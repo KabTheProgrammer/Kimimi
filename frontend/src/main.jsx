@@ -11,7 +11,7 @@ import { Provider } from 'react-redux'
 import store from './redux/store.js'
 
 // private routes'
-import PrivateRoute from './components/privateRoute.jsx'
+import PrivateRoute from './components/PrivateRoute.jsx'
 //Auth
 import Login from './pages/Auth/Login.jsx'
 import Register from './pages/Auth/Register.jsx'

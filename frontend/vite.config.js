@@ -6,8 +6,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      "/api/": "http://localhost:5000",
-      "/uploads/": "http://localhost:5000",
+      // "/api/": "http://localhost:5000",
+      // "/uploads/": "http://localhost:5000",
+      "/api/": "https://kimimi-final-day91yzdd-kabirus-projects-4ce204e8.vercel.app",
     },
   },
 });
