@@ -26,7 +26,7 @@ const app = express()
 
 // Enable CORS with the frontend origin
 app.use(cors({
-  origin: 'https://kimimifabricsandaccessories.vercel.app',
+  origin: 'https://kimimi-final.vercel.app',
   credentials: true, // Include this if you need cookies or authorization headers
 }))
 
