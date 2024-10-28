@@ -8,7 +8,7 @@ export default defineConfig({
     proxy: {
       // "/api/": "http://localhost:5000",
       // "/uploads/": "http://localhost:5000",
-      "/api/": "https://kimimi-final-day91yzdd-kabirus-projects-4ce204e8.vercel.app",
+      "/api/": "https://kimimi-final-backend-1grh5lpjj-kabirus-projects-4ce204e8.vercel.app",
     },
   },
 });
