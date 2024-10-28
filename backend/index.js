@@ -21,24 +21,8 @@ connectDB();
 
 const app = express();
 
-// List of allowed origins
-const allowedOrigins = [
-  'https://kimimi-final.vercel.app',
-  'https://kimimi-final-nf50pjlsx-kabirus-projects-4ce204e8.vercel.app',
-  'https://kimimi-final-backend-1grh5lpjj-kabirus-projects-4ce204e8.vercel.app',
-];
+app.use(cors({ origin: '*', credentials: true }));
 
-// Dynamic CORS configuration
-app.use(cors({
-  origin: (origin, callback) => {
-    if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
