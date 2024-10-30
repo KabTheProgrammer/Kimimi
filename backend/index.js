@@ -21,13 +21,7 @@ connectDB();
 
 const app = express();
 
-// Place CORS middleware before route handlers
-app.use(cors({
-  origin: ['https://kimimi-final.vercel.app', 'https://kimimi-final-nf50pjlsx-kabirus-projects-4ce204e8.vercel.app'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Explicit headers
-}));
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
