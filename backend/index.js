@@ -23,24 +23,7 @@ connectDB();
 // Initialize Express app
 const app = express();
 
-// Temporary wildcard CORS configuration
-app.use(
-  cors({
-    origin: '*',  // Allow all origins for testing
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  })
-);
-
-// Log middleware to ensure CORS is applied
-app.use((req, res, next) => {
-  console.log(`CORS middleware executed for request to ${req.path}`);
-  next();
-});
-
-// Middleware to handle preflight OPTIONS requests
-app.options('*', cors());
+app.use(cors());
 
 // Other middlewares
 app.use(express.json());
