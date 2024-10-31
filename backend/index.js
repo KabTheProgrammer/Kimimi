@@ -23,7 +23,7 @@ connectDB();
 // Initialize Express app
 const app = express();
 
-app.use(cors());
+app.use(cors());  
 
 // Other middlewares
 app.use(express.json());
