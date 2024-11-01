@@ -1,4 +1,4 @@
-export const BASE_URL = "https://kimimi-final-backend-1grh5lpjj-kabirus-projects-4ce204e8.vercel.app";
+export const BASE_URL = "https://kimimifinal.vercel.app";
 export const USERS_URL = "/api/users";
 export const CATEGORY_URL = "/api/category";
 export const PRODUCT_URL = "/api/products";
