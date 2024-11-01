@@ -25,26 +25,28 @@ const PlaceOrder = () => {
 
   const placeOrderHandler = async () => {
     try {
-      const res = await createOrder({
-        orderItems: cart.cartItems,
-        shippingAddress: cart.shippingAddress,
-        paymentMethod: cart.paymentMethod || "Momo or Card", // Defaulting to Paystack
-        itemsPrice: cart.itemsPrice,
-        shippingPrice: cart.shippingPrice,
-        taxPrice: cart.taxPrice,
-        totalPrice: cart.totalPrice,
-      }, {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      }).unwrap();
+        console.log("Token being sent:", userInfo.token); // Log token
+        const res = await createOrder({
+            orderItems: cart.cartItems,
+            shippingAddress: cart.shippingAddress,
+            paymentMethod: cart.paymentMethod || "Momo or Card",
+            itemsPrice: cart.itemsPrice,
+            shippingPrice: cart.shippingPrice,
+            taxPrice: cart.taxPrice,
+            totalPrice: cart.totalPrice,
+        }, {
+            headers: {
+                Authorization: `Bearer ${userInfo.token}`,
+            },
+        }).unwrap();
 
-      dispatch(clearCartItems());
-      navigate(`/order/${res._id}`);
+        dispatch(clearCartItems());
+        navigate(`/order/${res._id}`);
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to place order");
+        toast.error(error?.data?.message || "Failed to place order");
     }
-  };
+};
+
 
   return (
     <>

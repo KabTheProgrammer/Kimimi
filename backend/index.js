@@ -23,7 +23,11 @@ connectDB();
 // Initialize Express app
 const app = express();
 
-app.use(cors());  
+app.use(cors({
+  origin: ["https://kimimifinal.vercel.app"],
+  credentials: true,
+  allowedHeaders: ['Authorization', 'Content-Type'],
+}));  
 
 // Other middlewares
 app.use(express.json());
