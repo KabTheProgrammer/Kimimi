@@ -53,10 +53,17 @@ const Login = () => {
     try {
       const res = await login({ email, password }).unwrap();
       console.log("Login response:", res); // Log response
-      dispatch(setCredentials(res));
-      console.log("Updated userInfo:", useSelector((state) => state.auth.userInfo)); // Log updated userInfo
-      navigate(redirect);
+
+      // Ensure the response contains the token and user info
+      if (res.token && res.user) {
+        dispatch(setCredentials(res)); // Dispatching with full user object
+        console.log("Updated userInfo:", res); // Log updated userInfo
+        navigate(redirect);
+      } else {
+        toast.error("Login failed: Invalid response structure.");
+      }
     } catch (err) {
+      console.error("Login error:", err); // Log error for debugging
       toast.error(err?.data?.message || err.error);
     }
   };
@@ -129,11 +136,10 @@ const Login = () => {
             </button>
 
             {isLoading && (
-            <div className="flex justify-center">
-              <Loader />
-            </div>
-          )}
-
+              <div className="flex justify-center">
+                <Loader />
+              </div>
+            )}
           </form>
 
           <div className="mt-4 text-center">
