@@ -38,35 +38,36 @@ const Login = () => {
 
     // Validate fields
     if (!email) {
-      setEmailError(true);
+        setEmailError(true);
     }
 
     if (!password) {
-      setPasswordError(true);
+        setPasswordError(true);
     }
 
     // Stop submission if any field is missing
     if (!email || !password) {
-      return;
+        return;
     }
 
     try {
-      const res = await login({ email, password }).unwrap();
-      console.log("Login response:", res); // Log response
+        const res = await login({ email, password }).unwrap();
+        console.log("Login response:", res); // Log response
     
-      // Ensure the response contains the token and user info
-      if (res.token && res.user) {
-        dispatch(setCredentials(res)); // Dispatching with full user object
-        console.log("Updated userInfo:", res); // Log updated userInfo
-        navigate(redirect);
-      } else {
-        toast.error("Login failed: Invalid response structure.");
-      }
+        // Update this section based on the actual response structure
+        if (res._id && res.username) { // Check for valid fields
+            dispatch(setCredentials({ ...res, token: "your_generated_token_here" })); // Include token if you generate one server-side
+            console.log("Updated userInfo:", res); // Log updated userInfo
+            navigate(redirect);
+        } else {
+            toast.error("Login failed: Invalid response structure.");
+        }
     } catch (err) {
-      console.error("Login error:", err); // Log error for debugging
-      toast.error(err?.data?.message || err.error);
+        console.error("Login error:", err); // Log error for debugging
+        toast.error(err?.data?.message || err.error);
     }
-  };
+};
+
 
   return (
     <div
