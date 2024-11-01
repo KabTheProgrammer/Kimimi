@@ -53,7 +53,7 @@ const Login = () => {
     try {
       const res = await login({ email, password }).unwrap();
       console.log("Login response:", res); // Log response
-
+    
       // Ensure the response contains the token and user info
       if (res.token && res.user) {
         dispatch(setCredentials(res)); // Dispatching with full user object
@@ -136,10 +136,11 @@ const Login = () => {
             </button>
 
             {isLoading && (
-              <div className="flex justify-center">
-                <Loader />
-              </div>
-            )}
+            <div className="flex justify-center">
+              <Loader />
+            </div>
+          )}
+
           </form>
 
           <div className="mt-4 text-center">
