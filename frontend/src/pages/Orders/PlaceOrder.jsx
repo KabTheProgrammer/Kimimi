@@ -25,24 +25,37 @@ const PlaceOrder = () => {
 
   const placeOrderHandler = async () => {
     try {
-        console.log("Token being sent:", userInfo.token); // Log token
-        const res = await createOrder({
-            orderItems: cart.cartItems,
-            shippingAddress: cart.shippingAddress,
-            paymentMethod: cart.paymentMethod || "Momo or Card",
-            itemsPrice: cart.itemsPrice,
-            shippingPrice: cart.shippingPrice,
-            taxPrice: cart.taxPrice,
-            totalPrice: cart.totalPrice,
-        }, {
-            headers: {
-                Authorization: `Bearer ${userInfo.token}`,
-            },
-        }).unwrap();
+        // Check if userInfo and token are available
+        if (!userInfo || !userInfo.token) {
+            console.error("User not authenticated. Token is missing.");
+            toast.error("You are not logged in. Please log in to place an order.");
+            return;
+        }
 
+        console.log("Token being sent:", userInfo.token); // Log token for verification
+
+        const res = await createOrder(
+            {
+                orderItems: cart.cartItems,
+                shippingAddress: cart.shippingAddress,
+                paymentMethod: cart.paymentMethod || "Momo or Card",
+                itemsPrice: cart.itemsPrice,
+                shippingPrice: cart.shippingPrice,
+                taxPrice: cart.taxPrice,
+                totalPrice: cart.totalPrice,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${userInfo.token}`,
+                },
+            }
+        ).unwrap();
+
+        // Clear cart and navigate if order is successful
         dispatch(clearCartItems());
         navigate(`/order/${res._id}`);
     } catch (error) {
+        console.error("Order placement failed:", error);
         toast.error(error?.data?.message || "Failed to place order");
     }
 };
