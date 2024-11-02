@@ -38,36 +38,28 @@ const Login = () => {
 
     // Validate fields
     if (!email) {
-        setEmailError(true);
+      setEmailError(true);
     }
 
     if (!password) {
-        setPasswordError(true);
+      setPasswordError(true);
     }
 
     // Stop submission if any field is missing
     if (!email || !password) {
-        return;
+      return;
     }
 
     try {
-        const res = await login({ email, password }).unwrap();
-        console.log("Login response:", res); // Log response
-    
-        // Update this section based on the actual response structure
-        if (res._id && res.username) { // Check for valid fields
-            dispatch(setCredentials({ ...res, token: "your_generated_token_here" })); // Include token if you generate one server-side
-            console.log("Updated userInfo:", res); // Log updated userInfo
-            navigate(redirect);
-        } else {
-            toast.error("Login failed: Invalid response structure.");
-        }
+      const res = await login({ email, password }).unwrap();
+      console.log("Login response:", res); // Log response
+      dispatch(setCredentials(res));
+      console.log("Updated userInfo:", useSelector((state) => state.auth.userInfo)); // Log updated userInfo
+      navigate(redirect);
     } catch (err) {
-        console.error("Login error:", err); // Log error for debugging
-        toast.error(err?.data?.message || err.error);
+      toast.error(err?.data?.message || err.error);
     }
-};
-
+  };
 
   return (
     <div
@@ -136,12 +128,7 @@ const Login = () => {
               {isLoading ? "Signing In..." : "Sign In"}
             </button>
 
-            {isLoading && (
-            <div className="flex justify-center">
-              <Loader />
-            </div>
-          )}
-
+            {isLoading && <Loader />}
           </form>
 
           <div className="mt-4 text-center">
