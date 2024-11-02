@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useCreateProductMutation,
-  useUploadProductImageMutation,
 } from "../../redux/api/productApiSlice";
 import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
 import { toast } from "react-toastify";
@@ -16,11 +15,9 @@ const ProductList = () => {
   const [category, setCategory] = useState("");
   const [quantity, setQuantity] = useState("");
   const [brand, setBrand] = useState("");
-  const [stock, setStock] = useState(0);
   const [imageUrl, setImageUrl] = useState(null);
   const navigate = useNavigate();
 
-  const [uploadProductImage] = useUploadProductImageMutation();
   const [createProduct] = useCreateProductMutation();
   const { data: categories } = useFetchCategoriesQuery();
 
@@ -37,41 +34,41 @@ const ProductList = () => {
       productData.append("quantity", quantity);
       productData.append("brand", brand);
   
-      // Using unwrap to get the response or throw an error
       const data = await createProduct(productData).unwrap();
-  
-      // If data is received, show success message
       toast.success(`${data.name} is created`);
       navigate("/");
     } catch (error) {
-      // Check if the error has a message and show it
       console.error(error);
       toast.error(error.data?.message || "Product creation failed. Try again.");
     }
   };
   
-  
-
   const uploadFileHandler = async (e) => {
+    const file = e.target.files[0];
     const formData = new FormData();
-    formData.append("image", e.target.files[0]);
-  
+    formData.append("file", file);
+    formData.append("upload_preset", "unsigned_uploads"); // Your Cloudinary upload preset
+
     try {
-      const res = await uploadProductImage(formData).unwrap(); // Unwrap to get the response directly
-      toast.success(res.message);
-  
-      // Set the image URL from the response
-      setImage(res.image);
-      setImageUrl(res.image);
-      console.log(res.image); // Log the image URL for debugging
+      const res = await fetch(`https://api.cloudinary.com/v1_1/dcfhhdtjr/image/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.secure_url) {
+        toast.success("Image uploaded successfully!");
+        setImage(file);
+        setImageUrl(data.secure_url); // Store the image URL from Cloudinary
+      } else {
+        toast.error("Image upload failed.");
+      }
     } catch (error) {
-      toast.error(error?.data?.message || error.message || "Image upload failed.");
+      console.error(error);
+      toast.error("Image upload failed.");
     }
   };
   
-  
-  
-
   return (
     <div className="container xl:mx-[9rem] sm:mx-[0]">
       <div className="flex flex-col md:flex-row">
@@ -104,50 +101,50 @@ const ProductList = () => {
           </div>
 
           <div className="p-3">
-          <div className="flex flex-wrap">
-            <div className="flex-1">
+            <div className="flex flex-wrap">
+              <div className="flex-1">
                 <label htmlFor="name">Name</label> <br />
                 <input
-                type="text"
-                id="name"
-                className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                  type="text"
+                  id="name"
+                  className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
-            </div>
-            <div className="flex-1 ml-10">
+              </div>
+              <div className="flex-1 ml-10">
                 <label htmlFor="price">Price</label> <br />
                 <input
-                type="number"
-                id="price"
-                className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                  type="number"
+                  id="price"
+                  className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
                 />
-            </div>
+              </div>
             </div>
 
             <div className="flex flex-wrap">
-                <div className="flex-1">
+              <div className="flex-1">
                 <label htmlFor="quantity">Quantity</label> <br />
                 <input
-                    type="number"
-                    id="quantity"
-                    className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
+                  type="number"
+                  id="quantity"
+                  className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
                 />
-                </div>
-                <div className="flex-1 ml-10">
+              </div>
+              <div className="flex-1 ml-10">
                 <label htmlFor="brand">Brand</label> <br />
                 <input
-                    type="text"
-                    id="brand"
-                    className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
-                    value={brand}
-                    onChange={(e) => setBrand(e.target.value)}
+                  type="text"
+                  id="brand"
+                  className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
+                  value={brand}
+                  onChange={(e) => setBrand(e.target.value)}
                 />
-                </div>
+              </div>
             </div>
 
             <label htmlFor="" className="my-5">
@@ -161,24 +158,22 @@ const ProductList = () => {
             ></textarea>
 
             <div className="flex justify-between gap-10">
-
-            <div className="flex-1">
+              <div className="flex-1">
                 <label htmlFor="category">Category</label> <br />
                 <select
-                id="category"
-                placeholder="Choose Category"
-                className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
-                onChange={(e) => setCategory(e.target.value)}
+                  id="category"
+                  placeholder="Choose Category"
+                  className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
+                  onChange={(e) => setCategory(e.target.value)}
                 >
-                {categories?.map((c) => (
+                  {categories?.map((c) => (
                     <option key={c._id} value={c._id}>
-                    {c.name}
+                      {c.name}
                     </option>
-                ))}
+                  ))}
                 </select>
+              </div>
             </div>
-            </div>
-
 
             <button
               onClick={handleSubmit}
