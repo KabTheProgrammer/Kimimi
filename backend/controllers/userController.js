@@ -19,6 +19,7 @@ const createUser = asyncHandler(async (req, res) => {
     try {
         await newUser.save()
         createToken(res, newUser._id)
+        console.log(createToken)
         res.status(201).json({
             _id: newUser._id,
             username: newUser.username,
@@ -42,7 +43,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
         if(isPasswordValid) {
             createToken(res, existingUser._id)
-
+            console.log(createToken)
             res.status(201).json({
                 _id: existingUser._id,
                 username: existingUser.username,

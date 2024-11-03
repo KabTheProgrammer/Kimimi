@@ -25,6 +25,12 @@ const PlaceOrder = () => {
 
   const placeOrderHandler = async () => {
     try {
+      const headers = {};
+      console.log(userInfo)
+      if (userInfo?.token) {
+        headers.Authorization = `Bearer ${userInfo.token}`;
+      }
+
       const res = await createOrder({
         orderItems: cart.cartItems,
         shippingAddress: cart.shippingAddress,
@@ -34,18 +40,16 @@ const PlaceOrder = () => {
         taxPrice: cart.taxPrice,
         totalPrice: cart.totalPrice,
       }, {
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
+        headers,
       }).unwrap();
 
       dispatch(clearCartItems());
       navigate(`/order/${res._id}`);
     } catch (error) {
+      console.error("Error placing order:", error); // Log the error for debugging
       toast.error(error?.data?.message || "Failed to place order");
     }
   };
-
 
   return (
     <>
@@ -92,7 +96,7 @@ const PlaceOrder = () => {
         <div className="mt-8">
           <div className="flex justify-between flex-wrap p-8 bg-[#181818]">
             <ul className="text-lg">
-               <h2 className="text-2xl font-semibold mb-5">Order Summary</h2>
+              <h2 className="text-2xl font-semibold mb-5">Order Summary</h2>
               <li>
                 <span className="font-semibold mb-4">Items:</span> ₵{cart.itemsPrice}
               </li>
@@ -111,7 +115,7 @@ const PlaceOrder = () => {
               <p>
                 <strong>Address:</strong> {cart.shippingAddress.address}, {cart.shippingAddress.city} {cart.shippingAddress.postalCode}, {cart.shippingAddress.country}
               </p>
-                <span>Dispatch: Call this number for dispatch <strong>+233 (55) 594-5959</strong></span>
+              <span>Dispatch: Call this number for dispatch <strong>+233 (55) 594-5959</strong></span>
             </div>
 
             <div>

@@ -3,30 +3,25 @@ import User from '../models/userModels.js'
 import asyncHandler from './asyncHandler.js'
 
 const authenticate = asyncHandler(async (req, res, next) => {
-    let token;
+    let token = req.cookies.jwt;
+    console.log("Received Token:", token); // Debugging statement
 
-    // Read Jwt from the 'jwt' cookie
-
-    token = req.cookies.jwt
-
-    if(token) {
+    if (token) {
         try {
-            
-            const decoded = jwt.verify(token, process.env.JWT_SECRET)
-            req.user = await User.findById(decoded.userId).select("-password")
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = await User.findById(decoded.userId).select("-password");
+            console.log("Authenticated User:", req.user); // Log authenticated user
             next();
-
         } catch (error) {
-            res.status(401)
-            throw new Error("Not authorized, token failed")
+            console.error("Token verification failed:", error); // Log any errors
+            res.status(401);
+            throw new Error("Not authorized, token failed");
         }
-    } else{
-        res.status(401)
-        throw new Error("Not authorized, no token")
+    } else {
+        res.status(401);
+        throw new Error("Not authorized, no token");
     }
-})
-
-//Check if user is admin
+});
 
 const authorizeAdmin = (req, res, next) => {
     if (req.user && req.user.isAdmin) {

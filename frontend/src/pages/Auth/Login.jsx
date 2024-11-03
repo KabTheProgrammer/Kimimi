@@ -16,7 +16,6 @@ const Login = () => {
   const navigate = useNavigate();
 
   const [login, { isLoading }] = useLoginMutation();
-
   const { userInfo } = useSelector((state) => state.auth);
 
   const { search } = useLocation();
@@ -25,6 +24,7 @@ const Login = () => {
 
   useEffect(() => {
     if (userInfo) {
+      console.log("Navigating with userInfo:", userInfo); // Log when userInfo is set
       navigate(redirect);
     }
   }, [navigate, redirect, userInfo]);
@@ -32,29 +32,15 @@ const Login = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    // Reset errors
-    setEmailError(false);
-    setPasswordError(false);
+    setEmailError(!email);
+    setPasswordError(!password);
 
-    // Validate fields
-    if (!email) {
-      setEmailError(true);
-    }
-
-    if (!password) {
-      setPasswordError(true);
-    }
-
-    // Stop submission if any field is missing
-    if (!email || !password) {
-      return;
-    }
+    if (!email || !password) return;
 
     try {
       const res = await login({ email, password }).unwrap();
-      console.log("Login response:", res); // Log response
-      dispatch(setCredentials(res));
-      console.log("Updated userInfo:", useSelector((state) => state.auth.userInfo)); // Log updated userInfo
+      console.log(res);
+      dispatch(setCredentials({ ...res }));
       navigate(redirect);
     } catch (err) {
       toast.error(err?.data?.message || err.error);
@@ -72,13 +58,9 @@ const Login = () => {
       <section className="bg-white bg-opacity-70 p-10 rounded-lg shadow-lg w-[40rem]">
         <div>
           <h1 className="text-2xl text-black font-semibold mb-4 text-center">Sign In</h1>
-
           <form onSubmit={submitHandler}>
             <div className="my-[2rem]">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-black"
-              >
+              <label htmlFor="email" className="block text-sm font-medium text-black">
                 Email Address
               </label>
               <input
@@ -89,19 +71,13 @@ const Login = () => {
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
-                  if (emailError) setEmailError(false); // Reset error if user types
+                  if (emailError) setEmailError(false);
                 }}
               />
-              {emailError && (
-                <p className="text-red-500 mt-2">Email is required</p>
-              )}
+              {emailError && <p className="text-red-500 mt-2">Email is required</p>}
             </div>
-
             <div className="mb-4">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-black"
-              >
+              <label htmlFor="password" className="block text-sm font-medium text-black">
                 Password
               </label>
               <input
@@ -112,14 +88,11 @@ const Login = () => {
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  if (passwordError) setPasswordError(false); // Reset error if user types
+                  if (passwordError) setPasswordError(false);
                 }}
               />
-              {passwordError && (
-                <p className="text-red-500 mt-2">Password is required</p>
-              )}
+              {passwordError && <p className="text-red-500 mt-2">Password is required</p>}
             </div>
-
             <button
               disabled={isLoading}
               type="submit"
@@ -127,10 +100,8 @@ const Login = () => {
             >
               {isLoading ? "Signing In..." : "Sign In"}
             </button>
-
             {isLoading && <Loader />}
           </form>
-
           <div className="mt-4 text-center">
             <p className="text-black">
               New Customer?{" "}
