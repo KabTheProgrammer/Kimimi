@@ -24,28 +24,49 @@ const Login = () => {
 
   useEffect(() => {
     if (userInfo) {
-      console.log("Navigating with userInfo:", userInfo); // Log when userInfo is set
-      navigate(redirect);
+      console.log("Updated userInfo:", userInfo);  // Log the updated state after the component re-renders
     }
-  }, [navigate, redirect, userInfo]);
+  }, [userInfo]);  // This effect runs when userInfo changes
+  
 
   const submitHandler = async (e) => {
     e.preventDefault();
-
-    setEmailError(!email);
-    setPasswordError(!password);
-
-    if (!email || !password) return;
-
+  
+    // Reset errors
+    setEmailError(false);
+    setPasswordError(false);
+  
+    // Validate fields
+    if (!email) {
+      setEmailError(true);
+    }
+  
+    if (!password) {
+      setPasswordError(true);
+    }
+  
+    // Stop submission if any field is missing
+    if (!email || !password) {
+      return;
+    }
+  
     try {
       const res = await login({ email, password }).unwrap();
-      console.log(res);
-      dispatch(setCredentials({ ...res }));
-      navigate(redirect);
+      console.log("Login response:", res);  // Ensure the response includes the token
+  
+      // Check if the response contains the token
+      if (res.token) {
+        dispatch(setCredentials(res));  // Dispatch the response to Redux
+        navigate(redirect);  // Navigate after successful login
+      } else {
+        toast.error("Token is missing from response.");
+      }
     } catch (err) {
       toast.error(err?.data?.message || err.error);
     }
   };
+  
+  
 
   return (
     <div

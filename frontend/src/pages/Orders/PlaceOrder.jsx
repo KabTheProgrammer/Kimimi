@@ -25,6 +25,7 @@ const PlaceOrder = () => {
 
   const placeOrderHandler = async () => {
     try {
+      console.log('userInfo:', userInfo);
       const headers = {};
       console.log(userInfo)
       if (userInfo?.token) {
@@ -39,15 +40,13 @@ const PlaceOrder = () => {
         shippingPrice: cart.shippingPrice,
         taxPrice: cart.taxPrice,
         totalPrice: cart.totalPrice,
-      }, {
-        headers,
       }).unwrap();
 
       dispatch(clearCartItems());
       navigate(`/order/${res._id}`);
     } catch (error) {
       console.error("Error placing order:", error); // Log the error for debugging
-      toast.error(error?.data?.message || "Failed to place order");
+      toast.error(error?.data || "Failed to place order");
     }
   };
 
