@@ -9,6 +9,10 @@ import { getFavoritesFromLocalStorage } from "../Utils/localStorage";
 
 const initialFavorites = getFavoritesFromLocalStorage() || []
 
+const initialAuth = localStorage.getItem("userInfo")
+  ? { userInfo: JSON.parse(localStorage.getItem("userInfo")) }
+  : { userInfo: null };
+
 const store = configureStore({
     reducer: {
         [apiSlice.reducerPath]: apiSlice.reducer,
@@ -19,6 +23,7 @@ const store = configureStore({
     },
 
     preloadedState: {
+        auth: initialAuth,
         favorites: initialFavorites
     },
     
