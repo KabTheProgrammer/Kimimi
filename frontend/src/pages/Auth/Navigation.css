@@ -27,6 +27,15 @@
   opacity: 1;
 }
 
+.relative {
+  position: relative;
+  z-index: 10; /* Adjust to be higher than other elements */
+}
+
+.absolute {
+  position: absolute;
+  z-index: 20; /* Ensure dropdown appears on top */
+}
 /* Mobile Styles */
 .mobile-menu-icon {
   display: none;
