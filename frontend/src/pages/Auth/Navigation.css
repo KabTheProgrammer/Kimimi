@@ -67,6 +67,6 @@
 
   .relative {
     margin-top: auto;
-    padding-bottom: 1rem; /* Space to avoid cutoff */
+    padding-bottom: 2rem; /* Space to avoid cutoff */
   }
 }

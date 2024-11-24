@@ -121,7 +121,11 @@ const Login = () => {
             >
               {isLoading ? "Signing In..." : "Sign In"}
             </button>
-            {isLoading && <Loader />}
+            {isLoading && (
+                        <div className="flex justify-center items-center min-h-[10rem]">
+                            <Loader />
+                        </div>
+                    )}
           </form>
           <div className="mt-4 text-center">
             <p className="text-black">

@@ -23,17 +23,18 @@ const Home = () => {
         </Message>
       ) : (
         <>
-          <div className="flex justify-center items-center mt-[5rem] flex-wrap">
+         <div className="flex flex-col sm:flex-row justify-center items-center mt-[5rem] flex-wrap text-center">
             <h1 className="text-[3rem] sm:text-[2rem] mb-4 sm:mb-0">
               Special Products
             </h1>
             <Link
               to="/shop"
-              className="bg-pink-600 font-bold rounded-full py-2 px-10 ml-6 sm:ml-4"
+              className="bg-pink-600 font-bold rounded-full py-2 px-10 ml-0 sm:ml-4"
             >
               Shop
             </Link>
-          </div>
+        </div>
+
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 justify-center mt-[2rem] ml-[1rem] sm:ml-[2rem]">
             {data.products.map((product) => (
