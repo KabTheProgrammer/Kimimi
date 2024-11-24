@@ -3,7 +3,6 @@
   width: 4%;
   transition: width 0.3s ease-in-out;
   overflow: hidden;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -28,12 +27,10 @@
   opacity: 1;
 }
 
-.relative {
-  position: relative;
-  z-index: 100; /* Adjust to be higher than other elements */
+/* Mobile Styles */
+.mobile-menu-icon {
+  display: none;
 }
-
-
 
 @media (max-width: 1024px) {
   #navigation-container {
@@ -64,9 +61,8 @@
   .nav-item-name {
     font-size: 1.2rem;
   }
-
   .relative {
     margin-top: auto;
-    padding-bottom: 2rem; /* Space to avoid cutoff */
+    padding-bottom: 3rem; 
   }
 }
