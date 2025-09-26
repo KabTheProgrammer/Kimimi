@@ -15,15 +15,15 @@ const Home = () => {
       {!keyword ? <Header /> : null}
       {isLoading ? (
         <div className="flex justify-center items-center min-h-[22rem]">
-        <Loader />
-      </div>
+          <Loader />
+        </div>
       ) : isError ? (
         <Message variant="danger">
           {isError?.data || isError.error}
         </Message>
       ) : (
         <>
-         <div className="flex flex-col sm:flex-row justify-center items-center mt-[5rem] flex-wrap text-center">
+          <div className="flex flex-col sm:flex-row justify-center items-center mt-[5rem] flex-wrap text-center">
             <h1 className="text-[3rem] sm:text-[2rem] mb-4 sm:mb-0">
               Special Products
             </h1>
@@ -33,14 +33,17 @@ const Home = () => {
             >
               Shop
             </Link>
-        </div>
-
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 justify-center mt-[2rem] ml-[1rem] sm:ml-[2rem]">
             {data.products.map((product) => (
-              <div key={product._id} className="m-2">
+              <Link
+                key={product._id}
+                to={`/product/${product._id}`}
+                className="m-2 block hover:scale-105 transition-transform duration-200"
+              >
                 <Product product={product} />
-              </div>
+              </Link>
             ))}
           </div>
         </>
