@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    background: #0f0f10;
+    color: #fff;
+  }
+  
+  input,
+  textarea {
+    color: #000;
+  }
+ 
+  .apexcharts-menu-item {
+      color: black !important; /* Ensure the text is visible */
+      background-color: white !important; /* Ensure the background is not transparent */
+    }
+ 
