@@ -26,7 +26,6 @@ const app = express();
 // ✅ Robust CORS configuration
 const allowedOrigins = [
   "https://kimimi.vercel.app",      // correct deployed frontend
-  "https://kimimifinal.vercel.app", // optional older domain if needed
   "http://localhost:5173",          // dev
 ];
 
