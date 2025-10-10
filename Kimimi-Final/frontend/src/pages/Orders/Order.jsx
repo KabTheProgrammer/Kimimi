@@ -13,69 +13,77 @@ import {
 const Order = () => {
   const { id: orderId } = useParams();
   const navigate = useNavigate();
-
   const { data: order, isLoading, error, refetch } = useGetOrderDetailsQuery(orderId);
   const [payOrder, { isLoading: loadingPay }] = usePayOrderMutation();
   const [deliverOrder, { isLoading: loadingDeliver }] = useDeliverOrderMutation();
   const { userInfo } = useSelector((state) => state.auth);
 
+  // Load Paystack script once
   useEffect(() => {
-    if (order) {
-      console.log("Order details:", order);
+    if (!document.getElementById("paystack-script")) {
+      const script = document.createElement("script");
+      script.id = "paystack-script";
+      script.src = "https://js.paystack.co/v1/inline.js";
+      script.async = true;
+      document.body.appendChild(script);
     }
-  }, [order]);
+  }, []);
 
-  // Paystack payment handling
+  // ✅ Paystack payment handler
   const handlePaystackPayment = () => {
-    const paystackScript = document.createElement("script");
-    paystackScript.src = "https://js.paystack.co/v1/inline.js";
-    paystackScript.async = true;
-    document.body.appendChild(paystackScript);
+    if (!order) return;
 
-    paystackScript.onload = () => {
+    try {
       const handler = window.PaystackPop.setup({
-        key: 'pk_test_3cfc60101e67948b0d7311feefd6a7be38f5eaf1', // Your Paystack public key
-        email: order.user.email,
-        amount: Math.round(order.totalPrice * 100), // Amount in kobo (rounded to integer)
+        key: "pk_test_3cfc60101e67948b0d7311feefd6a7be38f5eaf1",
+        email: order.user?.email,
+        amount: Math.round(order.totalPrice * 100),
         currency: "GHS",
         callback: function (response) {
-          let message = 'Payment complete! Reference: ' + response.reference;
-          alert(message);
-    
-          // Use the payOrder mutation to update the order status
+          console.log("🟡 Sending Pay Order Request:", {
+  orderId: order._id,
+  paymentResult: {
+    id: response.reference,
+    status: "success",
+    update_time: new Date().toISOString(),
+    payer: { email_address: order.user?.email },
+  },
+});
           payOrder({
-            orderId: order._id, // Pass the order ID
-            paymentDetails: {
-              transactionId: response.reference, // Paystack transaction reference
-              isPaid: true,
+            orderId: order._id,
+            paymentResult: {
+              id: response.reference,
+              status: "success",
               update_time: new Date().toISOString(),
-              email: order.user.email,
+              payer: { email_address: order.user?.email },
             },
           })
-          .then(() => {
-            // Refetch order details and show success message
-            refetch();
-            toast.success("Payment successful! Order has been updated to 'Paid'.");
-            navigate("/user-orders");
-          })
-          .catch((error) => {
-            toast.error(error?.data?.message || "Failed to update payment status.");
-          });
+            .unwrap()
+            .then(() => {
+              toast.success("Payment successful!");
+              refetch(); // refresh order + product quantities
+              navigate("/user-orders");
+            })
+            .catch((err) => {
+              toast.error(err?.data?.message || "Payment update failed");
+            });
         },
-        onClose: () => {
-          toast.error("Payment was cancelled.");
+        onClose: function () {
+          toast.error("Payment cancelled");
         },
       });
-    
+
       handler.openIframe();
-    };
-    
+    } catch (err) {
+      console.error("Paystack setup failed:", err);
+      toast.error("Payment setup failed. Please try again.");
+    }
   };
 
-  // Handle marking order as delivered
+  // ✅ Admin: mark order as delivered
   const deliverHandler = async () => {
     try {
-      await deliverOrder(orderId);
+      await deliverOrder(orderId).unwrap();
       refetch();
       toast.success("Order marked as delivered");
     } catch (error) {
@@ -83,17 +91,15 @@ const Order = () => {
     }
   };
 
-  return isLoading ? (
-     <div className="flex justify-center items-center h-full">
-      <Loader />
-     </div>
-  ) : error ? (
-    <Message variant="danger">{error.data.message}</Message>
-  ) : (
+  if (isLoading) return <Loader />;
+  if (error) return <Message variant="danger">{error.data?.message || "Error loading order"}</Message>;
+
+  return (
     <div className="container mx-auto px-4 md:px-8 lg:max-w-6xl">
       <div className="flex flex-col md:flex-row">
+        {/* Order Items */}
         <div className="md:w-2/3 pr-4">
-          <div className="border gray-300 mt-5 pb-4 mb-5">
+          <div className="border-gray-300 mt-5 pb-4 mb-5">
             {order.orderItems.length === 0 ? (
               <Message>Order is empty</Message>
             ) : (
@@ -123,9 +129,7 @@ const Order = () => {
                         </td>
                         <td className="p-2 text-center">{item.qty}</td>
                         <td className="p-2 text-center">₵ {item.price}</td>
-                        <td className="p-2 text-center">
-                          ₵ {(item.qty * item.price).toFixed(2)}
-                        </td>
+                        <td className="p-2 text-center">₵ {(item.qty * item.price).toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -135,6 +139,7 @@ const Order = () => {
           </div>
         </div>
 
+        {/* Order Summary & Payment */}
         <div className="md:w-1/3">
           <div className="mt-5 border-gray-300 pb-4 mb-4">
             <h2 className="text-xl font-bold mb-2">Dispatch</h2>
@@ -142,13 +147,13 @@ const Order = () => {
               <strong className="text-pink-500">Order:</strong> {order._id}
             </p>
             <p className="mb-4">
-              <strong className="text-pink-500">Name:</strong> {order.user.username}
+              <strong className="text-pink-500">Name:</strong> {order.user?.username}
             </p>
             <p className="mb-4">
-              <strong className="text-pink-500">Email:</strong> {order.user.email}
+              <strong className="text-pink-500">Email:</strong> {order.user?.email}
             </p>
             <p className="mb-4">
-              <strong className="text-pink-500">Address: </strong> 
+              <strong className="text-pink-500">Address: </strong>
               {order.shippingAddress.address}, {order.shippingAddress.city}{" "}
               {order.shippingAddress.postalCode}, {order.shippingAddress.country}
             </p>
@@ -156,7 +161,7 @@ const Order = () => {
               <strong className="text-pink-500">Method:</strong> {order.paymentMethod}
             </p>
             <p className="mb-4">
-              <strong className="text-pink-500">Dispatch: </strong> Call this number for dispatch +233 (55) 594-5959
+              <strong className="text-pink-500">Dispatch:</strong> Call this number for dispatch +233 (55) 594-5959
             </p>
             {order.isPaid ? (
               <Message variant="success">Paid on {order.paidAt}</Message>
@@ -178,12 +183,13 @@ const Order = () => {
             <span>Total</span>
             <span>₵ {order.totalPrice}</span>
           </div>
+
           {!order.isPaid && (
             <div className="bg-pink-500 text-white py-2 px-4 rounded text-center text-lg w-full mt-4">
               {loadingPay && <Loader />}
               <button
-                onClick={handlePaystackPayment} // Handle payment when the entire background is clicked
-                disabled={loadingPay} // Disable the button if payment is loading
+                onClick={handlePaystackPayment}
+                disabled={loadingPay}
                 className="w-full h-full bg-transparent text-white cursor-pointer focus:outline-none"
               >
                 Pay with Paystack
@@ -191,13 +197,13 @@ const Order = () => {
             </div>
           )}
 
-
           {loadingDeliver && (
             <div className="flex justify-center items-center h-full">
-               <Loader />
+              <Loader />
             </div>
           )}
-          {userInfo && userInfo.isAdmin && order.isPaid && !order.isDelivered && (
+
+          {userInfo?.isAdmin && order.isPaid && !order.isDelivered && (
             <div>
               <button
                 type="button"

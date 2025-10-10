@@ -14,16 +14,17 @@ const authSlice = createSlice({
       state.userInfo = action.payload;
       localStorage.setItem("userInfo", JSON.stringify(action.payload));
 
+      // optional token expiration tracking
       const expirationTime = new Date().getTime() + 30 * 24 * 60 * 60 * 1000; // 30 days
       localStorage.setItem("expirationTime", expirationTime);
-      console.log("Initial State from localStorage:", initialState.userInfo);
-
-
-
+      console.log("✅ Credentials set:", action.payload);
     },
+
     logout: (state) => {
       state.userInfo = null;
-      localStorage.clear();
+      localStorage.removeItem("userInfo");
+      localStorage.removeItem("expirationTime");
+      console.log("🚪 User logged out");
     },
   },
 });

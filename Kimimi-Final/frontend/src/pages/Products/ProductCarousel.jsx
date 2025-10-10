@@ -49,7 +49,6 @@ const ProductCarousel = () => {
               numReviews,
               rating,
               quantity,
-              countInStock,
             }) => (
               <div key={_id} className="flex flex-col items-center">
                 <img
@@ -60,9 +59,11 @@ const ProductCarousel = () => {
 
                 <div className="mt-2 p-4 bg-white w-full rounded-b-lg">
                   <div className="flex justify-between items-center">
-                    <h2 className="text-lg sm:text-xl font-semibold text-black">{name}</h2>
+                    <h2 className="text-lg sm:text-xl font-semibold text-black">
+                      {name}
+                    </h2>
                     <p className="text-base sm:text-lg font-medium bg-pink-100 text-pink-800 rounded-full px-2.5 py-0.5">
-                    ₵ {price}
+                      ₵ {price}
                     </p>
                   </div>
                   <p className="mt-2 text-sm text-gray-800">
@@ -73,30 +74,42 @@ const ProductCarousel = () => {
                     <div className="flex flex-col gap-4 w-[48%]">
                       <div className="flex items-center">
                         <FaStore className="mr-2 text-gray-800" />
-                        <span className="text-gray-800 font-medium">Brand: {brand}</span>
+                        <span className="text-gray-800 font-medium">
+                          Brand: {brand}
+                        </span>
                       </div>
                       <div className="flex items-center">
                         <FaClock className="mr-2 text-gray-800" />
-                        <span className="text-gray-800 font-medium">Added: {moment(createdAt).fromNow()}</span>
+                        <span className="text-gray-800 font-medium">
+                          Added: {moment(createdAt).fromNow()}
+                        </span>
                       </div>
                       <div className="flex items-center">
                         <FaStar className="mr-2 text-gray-800" />
-                        <span className="text-gray-800 font-medium">Reviews: {numReviews}</span>
+                        <span className="text-gray-800 font-medium">
+                          Reviews: {numReviews}
+                        </span>
                       </div>
                     </div>
 
                     <div className="flex flex-col gap-4 w-[48%]">
                       <div className="flex items-center">
                         <FaStar className="mr-2 text-gray-800" />
-                        <span className="text-gray-800 font-medium">Ratings: {Math.round(rating)}</span>
+                        <span className="text-gray-800 font-medium">
+                          Ratings: {Math.round(rating)}
+                        </span>
                       </div>
                       <div className="flex items-center">
                         <FaShoppingCart className="mr-2 text-gray-800" />
-                        <span className="text-gray-800 font-medium">Quantity: {quantity}</span>
+                        <span className="text-gray-800 font-medium">
+                          Quantity: {quantity}
+                        </span>
                       </div>
                       <div className="flex items-center">
                         <FaBox className="mr-2 text-gray-800" />
-                        <span className="text-gray-800 font-medium">In Stock: {countInStock}</span>
+                        <span className="text-gray-800 font-medium">
+                          {quantity > 0 ? "In Stock" : "Out of Stock"}
+                        </span>
                       </div>
                     </div>
                   </div>

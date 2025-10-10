@@ -1,6 +1,7 @@
 import Order from "../models/orderModel.js";
 import Product from "../models/productModel.js";
 import axios from "axios"
+import asyncHandler from "../middlewares/asyncHandler.js";
 
 // Utility Function
 function calcPrices(orderItems) {
@@ -27,59 +28,59 @@ function calcPrices(orderItems) {
   };
 }
 
-
 const createOrder = async (req, res) => {
-  try {
-    const { orderItems, shippingAddress, paymentMethod } = req.body;
+  const { orderItems, shippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice } = req.body;
 
-    if (orderItems && orderItems.length === 0) {
-      res.status(400);
-      throw new Error("No order items");
+  console.log("🧾 Incoming Order Body:", req.body);
+
+  if (!orderItems || orderItems.length === 0) {
+    res.status(400);
+    throw new Error("No order items");
+  }
+
+  const enrichedOrderItems = [];
+
+  for (const item of orderItems) {
+    const product = await Product.findById(item.product);
+
+    if (!product) {
+      res.status(404);
+      throw new Error(`Product not found: ${item.product}`);
     }
 
-    const itemsFromDB = await Product.find({
-      _id: { $in: orderItems.map((x) => x._id) },
+    // just check stock, don't reduce
+    if (product.quantity < item.qty) {
+      res.status(400);
+      throw new Error(`Not enough stock for ${product.name}`);
+    }
+
+    enrichedOrderItems.push({
+      name: product.name,
+      image: product.image,
+      price: product.price,
+      qty: item.qty,
+      product: product._id,
     });
-
-    const dbOrderItems = orderItems.map((itemFromClient) => {
-      const matchingItemFromDB = itemsFromDB.find(
-        (itemFromDB) => itemFromDB._id.toString() === itemFromClient._id
-      );
-
-      if (!matchingItemFromDB) {
-        res.status(404);
-        throw new Error(`Product not found: ${itemFromClient._id}`);
-      }
-
-      return {
-        ...itemFromClient,
-        product: itemFromClient._id,
-        price: matchingItemFromDB.price,
-        _id: undefined,
-      };
-    });
-
-    const { itemsPrice, taxPrice, shippingPrice, totalPrice } =
-      calcPrices(dbOrderItems);
-
-    const order = new Order({
-      orderItems: dbOrderItems,
-      user: req.user._id,
-      shippingAddress,
-      paymentMethod,
-      itemsPrice,
-      taxPrice,
-      shippingPrice,
-      totalPrice,
-    });
-
-    const createdOrder = await order.save();
-    res.status(201).json(createdOrder);
-
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
+
+  const order = new Order({
+    orderItems: enrichedOrderItems,
+    user: req.user._id,
+    shippingAddress,
+    paymentMethod,
+    itemsPrice,
+    taxPrice,
+    shippingPrice,
+    totalPrice,
+    isPaid: false,
+  });
+
+  const createdOrder = await order.save();
+  res.status(201).json(createdOrder);
 };
+
+
+
 
 const getAllOrders = async (req, res) => {
   try {
@@ -169,28 +170,41 @@ const findOrderById = async (req, res) => {
   }
 };
 
-const markOrderAsPaid = async (req, res) => {
-  const order = await Order.findById(req.params.id);
+const markOrderAsPaid = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id).populate("orderItems.product");
 
-  if (order) {
-    order.isPaid = true;
-    order.paidAt = Date.now();
-
-    // Ensure this part handles Paystack payment details correctly
-    order.paymentResult = {
-      id: req.body.id,
-      status: req.body.status,
-      update_time: req.body.update_time,
-      email_address: req.body.email_address,
-    };
-
-    const updatedOrder = await order.save();
-    res.json(updatedOrder);
-  } else {
+  if (!order) {
     res.status(404);
     throw new Error("Order not found");
   }
-};
+
+  // Mark as paid
+  order.isPaid = true;
+  order.paidAt = Date.now();
+  order.paymentResult = {
+    id: req.body.id,
+    status: req.body.status,
+    update_time: req.body.update_time,
+    email_address: req.body.payer?.email_address,
+  };
+
+  // ✅ Reduce stock for each item
+  for (const item of order.orderItems) {
+  const product = await Product.findById(item.product);
+
+  if (product) {
+    if (product.quantity < item.qty) {
+      res.status(400);
+      throw new Error(`Not enough stock for ${product.name}`);
+    }
+    product.quantity -= item.qty;   // ✅ correct field
+    await product.save();
+  }
+}
+
+  const updatedOrder = await order.save();
+  res.json(updatedOrder);
+});
 
 const markOrderAsDelivered = async (req, res) => {
   try {
@@ -215,64 +229,67 @@ const initiatePayment = async (req, res) => {
   const { email, amount, paymentMethod } = req.body;
 
   try {
-    let response;
-    
-    if (paymentMethod === 'paystack') {
-      // Paystack payment initialization
-      response = await axios.post(
-        'https://api.paystack.co/transaction/initialize',
-        {
-          email,
-          amount: amount * 100, // Paystack expects the amount in kobo
-          currency: 'GHS',
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-    } else {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Unsupported payment method',
-      });
+    if (paymentMethod !== 'paystack') {
+      return res.status(400).json({ status: 'error', message: 'Unsupported payment method' });
     }
 
-    res.status(200).json({
-      status: 'success',
-      data: response.data,
-    });
+    const response = await axios.post(
+      'https://api.paystack.co/transaction/initialize',
+      { email, amount: amount * 100, currency: 'GHS' },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`, // Backend only
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    res.status(200).json({ status: 'success', data: response.data });
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      message: error.response ? error.response.data.message : error.message,
+      message: error.response?.data.message || error.message,
     });
   }
 };
 
-// Example of update order status to paid in backend
-const updateOrderToPaid = async (req, res) => {
-  const order = await Order.findById(req.params.id);
 
-  if (order) {
-    order.isPaid = true;
-    order.paidAt = Date.now();
-    order.paymentResult = {
-      id: req.body.transactionId, // Paystack or PayPal transaction ID
-      status: 'Paid',
-      update_time: req.body.update_time,
-      email_address: req.body.email,
-    };
+const updateOrderToPaid = asyncHandler(async (req, res) => {
+  console.log("🔥 updateOrderToPaid endpoint HIT:", req.params.id);
+  const order = await Order.findById(req.params.id).populate("orderItems.product");
 
-    const updatedOrder = await order.save();
-    res.json(updatedOrder); // Send back the updated order with paid status
-  } else {
+  if (!order) {
     res.status(404);
-    throw new Error("Order not found");
+    throw new Error("Order not found"); 
   }
-};
+
+  // Mark as paid
+  order.isPaid = true;
+  order.paidAt = Date.now();
+  order.paymentResult = {
+    id: req.body.id,
+    status: req.body.status,
+    update_time: req.body.update_time,
+    email_address: req.body.email_address,
+  };
+
+  // 🔥 Reduce product stock after successful payment
+  for (const item of order.orderItems) {
+    const product = await Product.findById(item.product);
+    if (product) {
+      if (product.quantity < item.qty) {
+        res.status(400);
+        throw new Error(`Not enough stock for ${product.name}`);
+      }
+      product.quantity -= item.qty;
+      await product.save();
+    }
+
+  }
+
+  const updatedOrder = await order.save();
+  res.json(updatedOrder);
+});
 
 
 export {

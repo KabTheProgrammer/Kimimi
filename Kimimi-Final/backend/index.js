@@ -15,7 +15,7 @@ import orderRoutes from './routes/orderRoutes.js';
 dotenv.config();
 const port = process.env.PORT || 5000;
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(__filename); 
 
 // Connect to the database
 connectDB();

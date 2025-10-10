@@ -25,17 +25,22 @@ const PlaceOrder = () => {
 
   const placeOrderHandler = async () => {
     try {
-      console.log('userInfo:', userInfo);
+      console.log("userInfo:", userInfo);
       const headers = {};
-      console.log(userInfo)
       if (userInfo?.token) {
         headers.Authorization = `Bearer ${userInfo.token}`;
       }
 
+      // ✅ FIX: map cart items to include product id
+      const orderItems = cart.cartItems.map((item) => ({
+        ...item,
+        product: item._id, // ✅ backend expects this key
+      }));
+
       const res = await createOrder({
-        orderItems: cart.cartItems,
+        orderItems,
         shippingAddress: cart.shippingAddress,
-        paymentMethod: cart.paymentMethod || "Momo or Card", // Defaulting to Paystack
+        paymentMethod: cart.paymentMethod || "Momo or Card",
         itemsPrice: cart.itemsPrice,
         shippingPrice: cart.shippingPrice,
         taxPrice: cart.taxPrice,
@@ -45,8 +50,10 @@ const PlaceOrder = () => {
       dispatch(clearCartItems());
       navigate(`/order/${res._id}`);
     } catch (error) {
-      console.error("Error placing order:", error); // Log the error for debugging
-      toast.error(error?.data || "Failed to place order");
+      console.error("Error placing order:", error);
+      toast.error(
+        error?.data?.message || error?.error || "Failed to place order"
+      );
     }
   };
 
@@ -84,7 +91,9 @@ const PlaceOrder = () => {
                     </td>
                     <td className="p-2">{item.qty}</td>
                     <td className="p-2">{item.price.toFixed(2)}</td>
-                    <td className="p-2">₵ {(item.qty * item.price).toFixed(2)}</td>
+                    <td className="p-2">
+                      ₵ {(item.qty * item.price).toFixed(2)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -97,24 +106,36 @@ const PlaceOrder = () => {
             <ul className="text-lg">
               <h2 className="text-2xl font-semibold mb-5">Order Summary</h2>
               <li>
-                <span className="font-semibold mb-4">Items:</span> ₵{cart.itemsPrice}
+                <span className="font-semibold mb-4">Items:</span> ₵
+                {cart.itemsPrice}
               </li>
               <li>
-                <span className="font-semibold mb-4">Vat:</span> ₵{cart.taxPrice}
+                <span className="font-semibold mb-4">Vat:</span> ₵
+                {cart.taxPrice}
               </li>
               <li>
-                <span className="font-semibold mb-4">Total:</span> ₵{cart.totalPrice}
+                <span className="font-semibold mb-4">Total:</span> ₵
+                {cart.totalPrice}
               </li>
             </ul>
 
-            {error && <Message variant="danger">{error.data.message}</Message>}
+            {error && (
+              <Message variant="danger">
+                {error?.data?.message || error?.error || "Something went wrong"}
+              </Message>
+            )}
 
             <div>
               <h2 className="text-2xl font-semibold mb-4">Dispatch</h2>
               <p>
-                <strong>Address:</strong> {cart.shippingAddress.address}, {cart.shippingAddress.city} {cart.shippingAddress.postalCode}, {cart.shippingAddress.country}
+                <strong>Address:</strong> {cart.shippingAddress.address},{" "}
+                {cart.shippingAddress.city} {cart.shippingAddress.postalCode},{" "}
+                {cart.shippingAddress.country}
               </p>
-              <span>Dispatch: Call this number for dispatch <strong>+233 (55) 594-5959</strong></span>
+              <span>
+                Dispatch: Call this number for dispatch{" "}
+                <strong>+233 (55) 594-5959</strong>
+              </span>
             </div>
 
             <div>

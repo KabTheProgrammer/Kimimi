@@ -9,20 +9,23 @@ export const orderApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: order,
       }),
+      invalidatesTags: ["Order", "Product"], // ✅ unified
     }),
 
     getOrderDetails: builder.query({
       query: (id) => ({
         url: `${ORDERS_URL}/${id}`,
       }),
+      providesTags: (result, error, id) => [{ type: "Order", id }],
     }),
 
     payOrder: builder.mutation({
-      query: ({ orderId, details }) => ({
+      query: ({ orderId, paymentResult }) => ({
         url: `${ORDERS_URL}/${orderId}/pay`,
         method: "PUT",
-        body: details,
+        body: paymentResult,
       }),
+      invalidatesTags: ["Order", "Product"], // ✅ this now works correctly
     }),
 
     getPaypalClientId: builder.query({
@@ -35,6 +38,7 @@ export const orderApiSlice = apiSlice.injectEndpoints({
       query: () => ({
         url: `${ORDERS_URL}/mine`,
       }),
+      providesTags: ["Order"],
       keepUnusedDataFor: 5,
     }),
 
@@ -42,6 +46,7 @@ export const orderApiSlice = apiSlice.injectEndpoints({
       query: () => ({
         url: ORDERS_URL,
       }),
+      providesTags: ["Order"],
     }),
 
     deliverOrder: builder.mutation({
@@ -49,6 +54,9 @@ export const orderApiSlice = apiSlice.injectEndpoints({
         url: `${ORDERS_URL}/${orderId}/deliver`,
         method: "PUT",
       }),
+      invalidatesTags: (result, error, orderId) => [
+        { type: "Order", id: orderId },
+      ],
     }),
 
     getTotalOrders: builder.query({
@@ -69,7 +77,6 @@ export const {
   useGetTotalOrdersQuery,
   useGetTotalSalesQuery,
   useGetTotalSalesByDateQuery,
-  // ------------------
   useCreateOrderMutation,
   useGetOrderDetailsQuery,
   usePayOrderMutation,

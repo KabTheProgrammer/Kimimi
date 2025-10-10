@@ -27,8 +27,9 @@ const Login = () => {
   useEffect(() => {
     if (userInfo) {
       console.log("Updated userInfo:", userInfo);
+      navigate(redirect); // auto-redirect if already logged in
     }
-  }, [userInfo]);
+  }, [userInfo, navigate, redirect]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -42,17 +43,14 @@ const Login = () => {
     if (!email || !password) return;
 
     try {
+      // 🔑 res will contain _id, email, username, isAdmin (but NOT token anymore)
       const res = await login({ email, password }).unwrap();
       console.log("Login response:", res);
 
-      if (res.token) {
-        dispatch(setCredentials(res));
-        navigate(redirect);
-      } else {
-        toast.error("Token is missing from response.");
-      }
+      dispatch(setCredentials(res)); // save user info in Redux
+      navigate(redirect);
     } catch (err) {
-      toast.error(err?.data?.message || err.error);
+      toast.error(err?.data?.message || err.error || "Login failed");
     }
   };
 
@@ -61,10 +59,10 @@ const Login = () => {
       className="flex items-center justify-center min-h-screen bg-cover bg-center"
       style={{
         backgroundImage:
-          "url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1964&q=80')",
+          "url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1964&q=80')",
       }}
     >
-      <section className="bg-white bg-opacity-70 p-10 rounded-lg shadow-lg w-[40rem]">
+      <section className="bg-white bg-opacity-70 p-10 rounded-lg shadow-lg w-[40rem] max-w-full">
         <div>
           <h1 className="text-2xl text-black font-semibold mb-4 text-center">
             Sign In
@@ -93,7 +91,6 @@ const Login = () => {
               )}
             </div>
 
-            {/* password with eye toggle 👁️ */}
             <div className="mb-4">
               <label
                 htmlFor="password"
@@ -101,11 +98,11 @@ const Login = () => {
               >
                 Password
               </label>
-              <div className="relative">
+              <div className="relative flex items-center">
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
-                  className="mt-1 p-2 border rounded w-full pr-10"
+                  className="p-2 border rounded w-full pr-10"
                   placeholder="Enter password"
                   value={password}
                   onChange={(e) => {
@@ -115,7 +112,7 @@ const Login = () => {
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+                  className="absolute right-3 text-gray-600"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}

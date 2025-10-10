@@ -1,3 +1,17 @@
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import moment from "moment";
+import { FaBox, FaClock, FaShoppingCart, FaStar, FaStore } from "react-icons/fa";
+import { toast } from "react-toastify";
+
+import Loader from "../../components/Loader";
+import Message from "../../components/message";
+import HeartIcon from "../../components/HeartIcon";
+import ProductTabs from "../../components/ProductTabs";
+import { useGetProductDetailsQuery, useCreateReviewMutation } from "../../redux/api/productApiSlice";
+import { addToCart } from "../../redux/features/cart/cartSlice";
+
 const Product = () => {
   const { id: productId } = useParams();
   const dispatch = useDispatch();
@@ -72,9 +86,7 @@ const Product = () => {
             <div className="flex flex-col justify-between mt-4 sm:mt-0 md:ml-4 w-full">
               <h2 className="text-2xl font-semibold">{product.name}</h2>
 
-              <p className="my-4 text-[#B0B0B0]">
-                {product.description}
-              </p>
+              <p className="my-4 text-[#B0B0B0]">{product.description}</p>
               <p className="text-5xl my-4 font-extrabold">₵{product.price}</p>
 
               <div className="flex flex-col sm:flex-row justify-between w-full max-w-full md:max-w-[30rem]">
@@ -95,27 +107,28 @@ const Product = () => {
 
                 <div className="flex flex-col">
                   <h1 className="flex items-center mb-6">
-                    <FaStar className="mr-2 text-white" /> Ratings: {rating}
+                    <FaStar className="mr-2 text-white" /> Ratings:{" "}
+                    {product.rating}
                   </h1>
                   <h1 className="flex items-center mb-6">
                     <FaShoppingCart className="mr-2 text-white" /> Quantity:{" "}
                     {product.quantity}
                   </h1>
                   <h1 className="flex items-center mb-6">
-                    <FaBox className="mr-2 text-white" /> In Stock:{" "}
-                    {product.countInStock}
+                    <FaBox className="mr-2 text-white" />{" "}
+                    {product.quantity > 0 ? "In Stock" : "Out of Stock"}
                   </h1>
                 </div>
               </div>
 
-              {product.countInStock > 0 && (
+              {product.quantity > 0 && (
                 <div className="mt-4">
                   <select
                     value={qty}
                     onChange={(e) => setQty(Number(e.target.value))}
                     className="p-2 w-[6rem] rounded-lg text-black"
                   >
-                    {[...Array(product.countInStock).keys()].map((x) => (
+                    {[...Array(product.quantity).keys()].map((x) => (
                       <option key={x + 1} value={x + 1}>
                         {x + 1}
                       </option>
@@ -127,7 +140,7 @@ const Product = () => {
               <div className="mt-4">
                 <button
                   onClick={addToCartHandler}
-                  disabled={product.countInStock === 0}
+                  disabled={product.quantity === 0}
                   className="bg-pink-600 text-white py-2 px-4 rounded-lg"
                 >
                   Add To Cart

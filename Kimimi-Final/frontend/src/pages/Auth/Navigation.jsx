@@ -15,7 +15,8 @@ import { useNavigate } from "react-router-dom";
 import "./Navigation.css";
 import { useSelector, useDispatch } from "react-redux";
 import { useLogoutMutation } from "../../redux/api/usersApiSlice";
-import { logout } from "../../redux/features/auth/authSlice";
+// import { logout } from "../../redux/features/auth/authSlice";
+import {logout} from "../../redux/features/auth/authSlice"
 import FavoritesCount from "../Products/FavoritesCount";
 
 const Navigation = () => {
@@ -29,7 +30,7 @@ const Navigation = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  const toggleSidebar = () => {
+  const toggleSidebar = () => { 
     setShowSidebar(!showSidebar);
   };
 

@@ -26,7 +26,6 @@ const ProductTabs = ({
       </div>
     );
   }
-  
 
   const handleTabClick = (tabNumber) => {
     setActiveTab(tabNumber);
@@ -156,7 +155,14 @@ const ProductTabs = ({
             ) : (
               data.map((product) => (
                 <div key={product._id}>
-                  <SmallProduct product={product} />
+                  <Link
+                    to={`/product/${product._id}`}
+                    onClick={() =>
+                      window.scrollTo({ top: 0, behavior: "smooth" })
+                    }
+                  >
+                    <SmallProduct product={product} />
+                  </Link>
                 </div>
               ))
             )}
