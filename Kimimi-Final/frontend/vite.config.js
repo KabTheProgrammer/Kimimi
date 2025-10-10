@@ -1,19 +1,19 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// Vite config with proxy setup
 export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
       "/api": {
-        target: "https://kimimi-final-backend.vercel.app",
+        target: "http://localhost:5000", // local backend
         changeOrigin: true,
-        secure: true,
+        secure: false,
       },
     },
   },
 });
+
 
 // import { defineConfig } from "vite";
 // import react from "@vitejs/plugin-react";

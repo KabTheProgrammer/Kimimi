@@ -1,10 +1,10 @@
-export const BASE_URL = "https://kimimi-final-backend.vercel.app" 
-// export const BASE_URL = "http://localhost:5000"
-export const USERS_URL = "/api/users"
-export const CATEGORY_URL = '/api/category'
-export const PRODUCT_URL = '/api/products'
-export const UPLOAD_URL = '/api/upload'
-export const ORDERS_URL = '/api/orders'
+export const BASE_URL =
+  import.meta.env.MODE === "development"
+    ? "/api"
+    : "https://kimimi-final-backend.vercel.app/api";
 
-
-
+export const USERS_URL = `${BASE_URL}/users`;
+export const CATEGORY_URL = `${BASE_URL}/category`;
+export const PRODUCT_URL = `${BASE_URL}/products`;
+export const UPLOAD_URL = `${BASE_URL}/upload`;
+export const ORDERS_URL = `${BASE_URL}/orders`;

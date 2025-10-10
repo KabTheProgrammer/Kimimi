@@ -1,10 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { updateCart } from "../../../Utils/cartUtils";
 
-
 const initialState = localStorage.getItem("cart")
   ? JSON.parse(localStorage.getItem("cart"))
-  : { cartItems: [], shippingAddress: {}, paymentMethod: "PayPal" };
+  : { cartItems: [], shippingAddress: {}, paymentMethod: "Paystack" }; // ✅ Default to Paystack
 
 const cartSlice = createSlice({
   name: "cart",
@@ -21,6 +20,7 @@ const cartSlice = createSlice({
       } else {
         state.cartItems = [...state.cartItems, item];
       }
+
       return updateCart(state, item);
     },
 
@@ -35,16 +35,20 @@ const cartSlice = createSlice({
     },
 
     savePaymentMethod: (state, action) => {
-      state.paymentMethod = action.payload;
+      state.paymentMethod = action.payload || "Paystack"; // ✅ fallback to Paystack
       localStorage.setItem("cart", JSON.stringify(state));
     },
 
-    clearCartItems: (state, action) => {
+    clearCartItems: (state) => {
       state.cartItems = [];
       localStorage.setItem("cart", JSON.stringify(state));
     },
 
-    resetCart: (state) => (state = initialState),
+    resetCart: () => {
+      const resetState = { cartItems: [], shippingAddress: {}, paymentMethod: "Paystack" };
+      localStorage.setItem("cart", JSON.stringify(resetState));
+      return resetState;
+    },
   },
 });
 
