@@ -21,27 +21,29 @@ const ProductList = () => {
   const [createProduct] = useCreateProductMutation();
   const { data: categories } = useFetchCategoriesQuery();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    try {
-      const productData = new FormData();
-      productData.append("image", image);
-      productData.append("name", name);
-      productData.append("description", description);
-      productData.append("price", price);
-      productData.append("category", category);
-      productData.append("quantity", quantity);
-      productData.append("brand", brand);
-  
-      const data = await createProduct(productData).unwrap();
-      toast.success(`${data.name} is created`);
-      navigate("/");
-    } catch (error) {
-      console.error(error);
-      toast.error(error.data?.message || "Product creation failed. Try again.");
-    }
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const productData = {
+      name,
+      description,
+      price,
+      category,
+      quantity,
+      brand,
+      image: imageUrl,
+    };
+
+    const data = await createProduct(productData).unwrap();
+    toast.success(`${data.name} is created`);
+    navigate("/");
+  } catch (error) {
+    console.error(error);
+    toast.error(error.data?.message || "Product creation failed. Try again.");
+  }
+};
+
   
   const uploadFileHandler = async (e) => {
     const file = e.target.files[0];
