@@ -6,13 +6,14 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:5000", // local backend
+        target: "http://localhost:5000",
         changeOrigin: true,
         secure: false,
       },
     },
   },
 });
+
 
 
 // import { defineConfig } from "vite";
