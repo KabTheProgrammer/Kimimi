@@ -1,7 +1,7 @@
 export const BASE_URL =
   import.meta.env.MODE === "development"
     ? "/api"
-    : "https://kimimi-final-backend.vercel.app/api";
+    : "https://kimimi-backend.vercel.app";
 
 export const USERS_URL = `${BASE_URL}/users`;
 export const CATEGORY_URL = `${BASE_URL}/category`;
