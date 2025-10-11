@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  useCreateProductMutation,
-} from "../../redux/api/productApiSlice";
+import { useCreateProductMutation } from "../../redux/api/productApiSlice";
 import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
 import { toast } from "react-toastify";
 import AdminMenu from "./AdminMenu";
@@ -21,30 +19,29 @@ const ProductList = () => {
   const [createProduct] = useCreateProductMutation();
   const { data: categories } = useFetchCategoriesQuery();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    const productData = {
-      name,
-      description,
-      price,
-      category,
-      quantity,
-      brand,
-      image: imageUrl,
-    };
+    try {
+      const productData = {
+        name,
+        description,
+        price,
+        category,
+        quantity,
+        brand,
+        image: imageUrl,
+      };
 
-    const data = await createProduct(productData).unwrap();
-    toast.success(`${data.name} is created`);
-    navigate("/");
-  } catch (error) {
-    console.error(error);
-    toast.error(error.data?.message || "Product creation failed. Try again.");
-  }
-};
+      const data = await createProduct(productData).unwrap();
+      toast.success(`${data.name} is created`);
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.data?.message || "Product creation failed. Try again.");
+    }
+  };
 
-  
   const uploadFileHandler = async (e) => {
     const file = e.target.files[0];
     const formData = new FormData();
@@ -52,10 +49,13 @@ const handleSubmit = async (e) => {
     formData.append("upload_preset", "unsigned_uploads"); // Your Cloudinary upload preset
 
     try {
-      const res = await fetch(`https://api.cloudinary.com/v1_1/dcfhhdtjr/image/upload`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/dcfhhdtjr/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
       const data = await res.json();
 
       if (data.secure_url) {
@@ -70,7 +70,7 @@ const handleSubmit = async (e) => {
       toast.error("Image upload failed.");
     }
   };
-  
+
   return (
     <div className="container xl:mx-[9rem] sm:mx-[0]">
       <div className="flex flex-col md:flex-row">
@@ -176,13 +176,15 @@ const handleSubmit = async (e) => {
                 </select>
               </div>
             </div>
-
-            <button
-              onClick={handleSubmit}
-              className="py-4 px-10 mt-5 rounded-lg text-lg font-bold bg-pink-600"
-            >
-              Submit
-            </button>
+            <form onSubmit={handleSubmit}>
+              <button
+                type="submit"
+                disabled={!imageUrl}
+                className="py-4 px-10 mt-5 rounded-lg text-lg font-bold bg-pink-600"
+              >
+                Submit
+              </button>
+            </form>
           </div>
         </div>
       </div>
