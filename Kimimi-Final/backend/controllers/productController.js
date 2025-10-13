@@ -3,21 +3,29 @@ import Product from "../models/productModel.js";
 
 const addProduct = asyncHandler(async (req, res) => {
   try {
-    const { name, description, price, category, quantity, brand, image } =
-      req.body;
+    const { name, description, price, category, quantity, brand } = req.body;
 
-    if (
-      !name ||
-      !brand ||
-      !description ||
-      !price ||
-      !category ||
-      !quantity ||
-      !image
-    ) {
-      return res
-        .status(400)
-        .json({ error: "All fields including image are required" });
+    if (!name || !brand || !description || !price || !category || !quantity) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // ✅ Upload image to Cloudinary if provided
+    let imageUrl = "";
+    if (req.file) {
+      const uploadResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "products", resource_type: "image" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+
+      imageUrl = uploadResult.secure_url;
+    } else {
+      return res.status(400).json({ error: "Product image is required" });
     }
 
     const product = new Product({
@@ -27,38 +35,55 @@ const addProduct = asyncHandler(async (req, res) => {
       category,
       quantity,
       brand,
-      image,
+      image: imageUrl,
     });
+
     await product.save();
     res.status(201).json(product);
   } catch (error) {
-    console.error(error);
-    res.status(400).json(error.message);
+    console.error("❌ Error adding product:", error);
+    res.status(500).json({ error: "Server error while adding product" });
   }
 });
 
 const updateProductDetails = asyncHandler(async (req, res) => {
   try {
-    const { name, description, price, category, quantity, brand, image } = req.body;
+    const { name, description, price, category, quantity, brand } = req.body;
 
-    if (!name || !brand || !description || !price || !category || !quantity) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
-
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      { name, description, price, category, quantity, brand, image },
-      { new: true }
-    );
-
+    const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    res.json(product);
+    // ✅ Handle new image if uploaded
+    if (req.file) {
+      const uploadResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "products", resource_type: "image" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+
+      product.image = uploadResult.secure_url;
+    }
+
+    // ✅ Update other fields
+    product.name = name || product.name;
+    product.description = description || product.description;
+    product.price = price || product.price;
+    product.category = category || product.category;
+    product.quantity = quantity || product.quantity;
+    product.brand = brand || product.brand;
+
+    const updatedProduct = await product.save();
+    res.json(updatedProduct);
   } catch (error) {
-    console.error(error);
-    res.status(400).json({ error: error.message });
+    console.error("❌ Error updating product:", error);
+    res.status(500).json({ error: "Server error while updating product" });
   }
 });
 
