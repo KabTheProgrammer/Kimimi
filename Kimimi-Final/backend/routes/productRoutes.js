@@ -1,5 +1,12 @@
 import express from "express";
 import multer from "multer";
+const router = express.Router();
+
+// Middleware
+import { authenticate, authorizeAdmin } from "../middlewares/authMiddleware.js";
+import checkId from "../middlewares/checkId.js";
+
+// Controllers
 import {
   addProduct,
   updateProductDetails,
@@ -12,14 +19,11 @@ import {
   fetchNewProducts,
   filterProducts,
 } from "../controllers/productController.js";
-import { authenticate, authorizeAdmin } from "../middlewares/authMiddleware.js";
-import checkId from "../middlewares/checkId.js";
 
-const router = express.Router();
-
-// ✅ Use multer instead of formidable
+// ✅ Multer config: store in memory (for Cloudinary stream)
 const upload = multer({ storage: multer.memoryStorage() });
 
+// Routes
 router
   .route("/")
   .get(fetchProducts)
@@ -27,7 +31,6 @@ router
 
 router.route("/allproducts").get(fetchAllProducts);
 router.route("/:id/reviews").post(authenticate, checkId, addProductReview);
-
 router.get("/top", fetchTopProducts);
 router.get("/new", fetchNewProducts);
 

@@ -3,28 +3,14 @@ import Product from "../models/productModel.js";
 
 const addProduct = asyncHandler(async (req, res) => {
   try {
-    const { name, description, price, category, quantity, brand } = req.body;
+    const { name, description, price, category, quantity, brand, image } = req.body;
 
     if (!name || !brand || !description || !price || !category || !quantity) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // ✅ Upload image to Cloudinary if provided
-    let imageUrl = "";
-    if (req.file) {
-      const uploadResult = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "products", resource_type: "image" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        stream.end(req.file.buffer);
-      });
-
-      imageUrl = uploadResult.secure_url;
-    } else {
+    // ✅ Accept image URL directly from frontend
+    if (!image) {
       return res.status(400).json({ error: "Product image is required" });
     }
 
@@ -35,7 +21,7 @@ const addProduct = asyncHandler(async (req, res) => {
       category,
       quantity,
       brand,
-      image: imageUrl,
+      image, // Directly use image URL
     });
 
     await product.save();
@@ -46,38 +32,28 @@ const addProduct = asyncHandler(async (req, res) => {
   }
 });
 
+
 const updateProductDetails = asyncHandler(async (req, res) => {
   try {
-    const { name, description, price, category, quantity, brand } = req.body;
+    const { name, description, price, category, quantity, brand, image } = req.body;
 
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // ✅ Handle new image if uploaded
-    if (req.file) {
-      const uploadResult = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "products", resource_type: "image" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        stream.end(req.file.buffer);
-      });
-
-      product.image = uploadResult.secure_url;
-    }
-
-    // ✅ Update other fields
+    // ✅ Update fields if provided
     product.name = name || product.name;
     product.description = description || product.description;
     product.price = price || product.price;
     product.category = category || product.category;
     product.quantity = quantity || product.quantity;
     product.brand = brand || product.brand;
+
+    // ✅ Update image only if new URL provided
+    if (image) {
+      product.image = image;
+    }
 
     const updatedProduct = await product.save();
     res.json(updatedProduct);
