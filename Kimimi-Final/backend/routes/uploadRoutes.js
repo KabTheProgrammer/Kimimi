@@ -1,37 +1,35 @@
-// backend/routes/upload.js
 import express from 'express';
-import cloudinary from '../config/cloudinary.js'; // Import Cloudinary config
+import cloudinary from '../config/cloudinary.js';
 import multer from 'multer';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() }); // Store file in memory
 
-// Image upload route
-router.post('/upload', upload.single('image'), async (req, res) => {
+// ✅ Change '/upload' → '/'
+router.post('/', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    // Using Cloudinary's upload stream
     const stream = cloudinary.uploader.upload_stream(
-      { resource_type: 'auto' },
+      { resource_type: 'auto', folder: 'products' },
       (error, result) => {
         if (error) {
+          console.error('Cloudinary upload failed:', error);
           return res.status(500).json({ message: 'Image upload failed', error });
         }
 
-        // Send back the URL of the uploaded image
         res.status(200).json({
           message: 'Image uploaded successfully',
-          image: result.secure_url, // The URL of the uploaded image
+          image: result.secure_url,
         });
       }
     );
 
-    // Create a stream and send the image buffer to Cloudinary
     stream.end(req.file.buffer);
   } catch (error) {
+    console.error('Upload route error:', error);
     res.status(500).json({ message: 'Image upload failed', error });
   }
 });
