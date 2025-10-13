@@ -11,11 +11,10 @@ import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
 import { toast } from "react-toastify";
 
 const AdminProductUpdate = () => {
-  const { _id: productId } = useParams(); // ✅ fixed param name
+  const { _id: productId } = useParams(); // ✅ correct param name
 
-  // ✅ use the unified getProductDetails
+  // ✅ fetch product details
   const { data: productData } = useGetProductDetailsQuery(productId);
-
   console.log("Product data:", productData);
 
   const [image, setImage] = useState("");
@@ -28,20 +27,20 @@ const AdminProductUpdate = () => {
 
   const navigate = useNavigate();
 
-  // Fetch categories
+  // ✅ fetch categories
   const { data: categories = [] } = useFetchCategoriesQuery();
 
   const [uploadProductImage] = useUploadProductImageMutation();
   const [updateProduct] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
 
-  // ✅ Update state when productData loads
+  // ✅ set state when data is ready
   useEffect(() => {
     if (productData && productData._id) {
       setName(productData.name);
       setDescription(productData.description);
       setPrice(productData.price);
-      setCategory(productData.category?._id || "");
+      setCategory(productData.category?._id || productData.category || "");
       setQuantity(productData.quantity);
       setBrand(productData.brand);
       setImage(productData.image);
@@ -53,16 +52,10 @@ const AdminProductUpdate = () => {
     formData.append("image", e.target.files[0]);
     try {
       const res = await uploadProductImage(formData).unwrap();
-      toast.success("Image uploaded successfully", {
-        position: "top-right",
-        autoClose: 2000,
-      });
+      toast.success("Image uploaded successfully");
       setImage(res.image);
     } catch (err) {
-      toast.error("Failed to upload image", {
-        position: "top-right",
-        autoClose: 2000,
-      });
+      toast.error("Failed to upload image");
     }
   };
 
@@ -78,40 +71,26 @@ const AdminProductUpdate = () => {
       formData.append("quantity", quantity);
       formData.append("brand", brand);
 
-      await updateProduct({ productId: params.id, formData }).unwrap();
-
-      toast.success("Product successfully updated", {
-        position: "top-right",
-        autoClose: 2000,
-      });
+      await updateProduct({ productId, formData }).unwrap(); // ✅ fixed
+      toast.success("Product successfully updated");
       navigate("/admin/allproductslist");
     } catch (err) {
       console.log(err);
-      toast.error("Product update failed. Try again.", {
-        position: "top-right",
-        autoClose: 2000,
-      });
+      toast.error("Product update failed. Try again.");
     }
   };
 
   const handleDelete = async () => {
     try {
-      let answer = window.confirm("Are you sure you want to delete this product?");
-      if (!answer) return;
+      const confirmDelete = window.confirm("Are you sure you want to delete this product?");
+      if (!confirmDelete) return;
 
-      await deleteProduct(params.id).unwrap();
-
-      toast.success("Product successfully deleted", {
-        position: "top-right",
-        autoClose: 2000,
-      });
+      await deleteProduct(productId).unwrap(); // ✅ fixed
+      toast.success("Product successfully deleted");
       navigate("/admin/allproductslist");
     } catch (err) {
       console.log(err);
-      toast.error("Delete failed. Try again.", {
-        position: "top-right",
-        autoClose: 2000,
-      });
+      toast.error("Delete failed. Try again.");
     }
   };
 
@@ -124,24 +103,14 @@ const AdminProductUpdate = () => {
 
           {image && (
             <div className="text-center">
-              <img
-                src={image}
-                alt="product"
-                className="block mx-auto w-full h-[40%]"
-              />
+              <img src={image} alt="product" className="block mx-auto w-full h-[40%]" />
             </div>
           )}
 
           <div className="mb-3">
             <label className="text-white py-2 px-4 block w-full text-center rounded-lg cursor-pointer font-bold py-11">
               {image ? "Change image" : "Upload image"}
-              <input
-                type="file"
-                name="image"
-                accept="image/*"
-                onChange={uploadFileHandler}
-                className="text-white"
-              />
+              <input type="file" accept="image/*" onChange={uploadFileHandler} />
             </label>
           </div>
 
