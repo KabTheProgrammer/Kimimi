@@ -3,34 +3,22 @@ import HeartIcon from "./HeartIcon";
 
 const Product = ({ product }) => {
   return (
-    <div
-      className="
-        product-container p-2 relative w-full max-w-md
-        sm:h-[36rem]            /* keep fixed height only for desktop */
-        h-auto                  /* allow auto height on mobile */
-      "
-    >
-      <Link to={`/product/${product._id}`} className="block h-full">
+    <div className="product-container p-2 relative w-full max-w-md h-[36rem]">
+      <Link
+        to={`/product/${product._id}`}
+        className="block h-full" // Make the link cover the full card
+      >
         {/* Image */}
-        <div className="image-container relative">
+        <div className="image-container relative h-[85%]">
           <img
             src={product.image}
             alt={product.name}
-            className="w-full object-cover rounded-t
-                       sm:h-[85%]   /* desktop height */
-                       h-auto       /* mobile natural height */
-            "
+            className="w-full h-full object-cover rounded-t"
           />
         </div>
 
         {/* Description */}
-        <div
-          className="
-            p-2 bg-white rounded-b flex items-center justify-between
-            sm:h-[15%]      /* keep desktop layout */
-            h-auto          /* natural mobile fit */
-          "
-        >
+        <div className="p-2 bg-white rounded-b h-[15%] flex items-center justify-between">
           <span className="product-name text-lg text-gray-800 px-2 py-1 rounded">
             {product.name}
           </span>
@@ -40,6 +28,7 @@ const Product = ({ product }) => {
         </div>
       </Link>
 
+      {/* Keep HeartIcon outside the Link so clicking it won't navigate */}
       <HeartIcon product={product} />
     </div>
   );
