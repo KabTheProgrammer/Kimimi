@@ -62,16 +62,18 @@ const AdminProductUpdate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const formData = new FormData();
-      formData.append("image", image);
-      formData.append("name", name);
-      formData.append("description", description);
-      formData.append("price", price);
-      formData.append("category", category);
-      formData.append("quantity", quantity);
-      formData.append("brand", brand);
+      const productData = {
+        image,
+        name,
+        description,
+        price,
+        category,
+        quantity,
+        brand,
+      };
 
-      await updateProduct({ productId, formData }).unwrap(); // ✅ fixed
+      await updateProduct({ productId, productData }).unwrap();
+
       toast.success("Product successfully updated");
       navigate("/admin/allproductslist");
     } catch (err) {
@@ -82,7 +84,9 @@ const AdminProductUpdate = () => {
 
   const handleDelete = async () => {
     try {
-      const confirmDelete = window.confirm("Are you sure you want to delete this product?");
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this product?"
+      );
       if (!confirmDelete) return;
 
       await deleteProduct(productId).unwrap(); // ✅ fixed
@@ -103,14 +107,22 @@ const AdminProductUpdate = () => {
 
           {image && (
             <div className="text-center">
-              <img src={image} alt="product" className="block mx-auto w-full h-[40%]" />
+              <img
+                src={image}
+                alt="product"
+                className="block mx-auto w-full h-[40%]"
+              />
             </div>
           )}
 
           <div className="mb-3">
             <label className="text-white py-2 px-4 block w-full text-center rounded-lg cursor-pointer font-bold py-11">
               {image ? "Change image" : "Upload image"}
-              <input type="file" accept="image/*" onChange={uploadFileHandler} />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={uploadFileHandler}
+              />
             </label>
           </div>
 
