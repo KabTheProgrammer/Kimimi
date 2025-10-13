@@ -11,10 +11,10 @@ import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
 import { toast } from "react-toastify";
 
 const AdminProductUpdate = () => {
-  const params = useParams();
+  const { _id: productId } = useParams(); // ✅ fixed param name
 
   // ✅ use the unified getProductDetails
-  const { data: productData } = useGetProductDetailsQuery(params.id);
+  const { data: productData } = useGetProductDetailsQuery(productId);
 
   console.log("Product data:", productData);
 
@@ -26,17 +26,16 @@ const AdminProductUpdate = () => {
   const [quantity, setQuantity] = useState("");
   const [brand, setBrand] = useState("");
 
-  // hook
   const navigate = useNavigate();
 
-  // Fetch categories using RTK Query
+  // Fetch categories
   const { data: categories = [] } = useFetchCategoriesQuery();
 
   const [uploadProductImage] = useUploadProductImageMutation();
   const [updateProduct] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
 
-  // ✅ update state when productData loads
+  // ✅ Update state when productData loads
   useEffect(() => {
     if (productData && productData._id) {
       setName(productData.name);
