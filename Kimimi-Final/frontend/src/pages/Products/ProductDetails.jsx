@@ -62,23 +62,19 @@ const ProductDetails = () => {
     dispatch(addToCart({ ...product, qty }));
     navigate("/cart");
   };
-console.log("useParams id:", productId);
-
+  console.log("useParams id:", productId);
 
   return (
     <>
-      <div className="text-center">
-        <Link
-          to="/"
-          className="text-white font-semibold hover:underline"
-        >
+      <div className="hidden sm:block text-center mb-4">
+        <Link to="/" className="text-white font-semibold hover:underline">
           Go Back
         </Link>
       </div>
 
       {isLoading ? (
         <div className="flex justify-center items-center h-full">
-           <Loader />
+          <Loader />
         </div>
       ) : error ? (
         <Message variant="danger">
@@ -87,33 +83,36 @@ console.log("useParams id:", productId);
       ) : (
         <>
           <div className="flex flex-col items-center mt-8 px-4">
-          <div className="w-full max-w-4xl flex justify-center items-center"> {/* Centering the image container */}
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-auto max-w-sm mb-4" // Ensures the image is centered and resizes based on screen size
-            />
-            <HeartIcon product={product} />
-          </div>
+            <div className="w-full max-w-4xl flex justify-center items-center">
+              {" "}
+              {/* Centering the image container */}
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-auto max-w-sm mb-4" // Ensures the image is centered and resizes based on screen size
+              />
+              <HeartIcon product={product} />
+            </div>
 
             <div className="w-full max-w-4xl text-left">
               <h2 className="text-2xl font-semibold">{product.name}</h2>
-              <p className="my-4 text-[#B0B0B0]">
-                {product.description}
-              </p>
+              <p className="my-4 text-[#B0B0B0]">{product.description}</p>
 
               <p className="text-5xl my-4 font-extrabold">₵ {product.price}</p>
 
               <div className="flex flex-col sm:flex-row justify-between w-full mb-6">
                 <div>
                   <h1 className="flex items-center mb-2">
-                    <FaStore className="mr-2 text-white" /> Brand: {product.brand}
+                    <FaStore className="mr-2 text-white" /> Brand:{" "}
+                    {product.brand}
                   </h1>
                   <h1 className="flex items-center mb-2">
-                    <FaClock className="mr-2 text-white" /> Added: {moment(product.createAt).fromNow()}
+                    <FaClock className="mr-2 text-white" /> Added:{" "}
+                    {moment(product.createAt).fromNow()}
                   </h1>
                   <h1 className="flex items-center mb-2">
-                    <FaStar className="mr-2 text-white" /> Reviews: {product.numReviews}
+                    <FaStar className="mr-2 text-white" /> Reviews:{" "}
+                    {product.numReviews}
                   </h1>
                 </div>
 
@@ -122,7 +121,8 @@ console.log("useParams id:", productId);
                     <FaStar className="mr-2 text-white" /> Ratings: {rating}
                   </h1>
                   <h1 className="flex items-center mb-2">
-                    <FaShoppingCart className="mr-2 text-white" /> Quantity: {product.quantity}
+                    <FaShoppingCart className="mr-2 text-white" /> Quantity:{" "}
+                    {product.quantity}
                   </h1>
                 </div>
               </div>

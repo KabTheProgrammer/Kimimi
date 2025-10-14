@@ -18,9 +18,7 @@ const Home = () => {
           <Loader />
         </div>
       ) : isError ? (
-        <Message variant="danger">
-          {isError?.data || isError.error}
-        </Message>
+        <Message variant="danger">{isError?.data || isError.error}</Message>
       ) : (
         <>
           <div className="flex flex-col sm:flex-row justify-center items-center mt-[5rem] flex-wrap text-center">
@@ -40,7 +38,7 @@ const Home = () => {
               <Link
                 key={product._id}
                 to={`/product/${product._id}`}
-                className="m-2 block hover:scale-105 transition-transform duration-200"
+                className="m-2 block md:hover:scale-105 transition-transform duration-200"
               >
                 <Product product={product} />
               </Link>

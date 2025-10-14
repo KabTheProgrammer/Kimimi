@@ -52,16 +52,17 @@ const Navigation = () => {
   const ICON_SIZE = 26;
   return (
     <div>
-      <button
-        className="mobile-menu-icon xl:hidden lg:hidden md:hidden"
-        onClick={toggleSidebar}
-      >
-        {showSidebar ? (
-          <AiOutlineClose size={30} />
-        ) : (
-          <AiOutlineMenu size={30} />
-        )}
-      </button>
+     <button
+  className="mobile-menu-icon xl:hidden lg:hidden md:hidden mt-5 text-pink-500 hover:text-pink-600 transition-colors duration-200"
+  onClick={toggleSidebar}
+>
+  {showSidebar ? (
+    <AiOutlineClose size={30} />
+  ) : (
+    <AiOutlineMenu size={30} />
+  )}
+</button>
+
 
       <div
         className={`${
