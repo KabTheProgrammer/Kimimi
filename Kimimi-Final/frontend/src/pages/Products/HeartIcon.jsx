@@ -1,12 +1,11 @@
 import { useEffect } from "react";
-import { FaHeart, FaRegHeart, FaVaadin } from "react-icons/fa";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import {
   addToFavorites,
   removeFromFavorites,
   setFavorites,
 } from "../../redux/features/favorites/favoriteSlice";
-
 import {
   addFavoriteToLocalStorage,
   getFavoritesFromLocalStorage,
@@ -21,31 +20,55 @@ const HeartIcon = ({ product }) => {
   useEffect(() => {
     const favoritesFromLocalStorage = getFavoritesFromLocalStorage();
     dispatch(setFavorites(favoritesFromLocalStorage));
-  }, []);
+  }, [dispatch]);
 
-  const toggleFavorites = () => {
+  const toggleFavorites = (e) => {
+    // Stop everything so the parent Link won't receive this event
+    if (e) {
+      e.preventDefault?.();
+      e.stopPropagation?.();
+    }
+
     if (isFavorite) {
       dispatch(removeFromFavorites(product));
-      // remove the product from the localStorage as well
       removeFavoriteFromLocalStorage(product._id);
     } else {
       dispatch(addToFavorites(product));
-      // add the product to localStorage as well
       addFavoriteToLocalStorage(product);
     }
   };
 
+  // helper to stop both pointer and keyboard events before they bubble
+  const stopAndToggle = (e) => {
+    e.preventDefault?.();
+    e.stopPropagation?.();
+    toggleFavorites(e);
+  };
+
   return (
-    <div
-      className="absolute top-2 right-5 cursor-pointer"
-      onClick={toggleFavorites}
+    // Use a button (not a div) so it's semantic and doesn't accidentally submit forms.
+    <button
+      type="button"
+      onClick={stopAndToggle}
+      onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
+      onKeyDown={(e) => {
+        // make keyboard accessible: toggle on Enter/Space but don't let event bubble
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleFavorites(e);
+        }
+      }}
+      aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+      className="absolute top-3 right-3 z-30 cursor-pointer bg-white/70 p-2 rounded-full shadow-md hover:bg-white transition"
     >
       {isFavorite ? (
-        <FaHeart className="text-pink-500" />
+        <FaHeart className="text-pink-600 text-xl" />
       ) : (
-        <FaRegHeart className="text-white" />
+        <FaRegHeart className="text-black text-xl" />
       )}
-    </div>
+    </button>
   );
 };
 

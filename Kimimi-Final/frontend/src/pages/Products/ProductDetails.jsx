@@ -20,6 +20,7 @@ import HeartIcon from "./HeartIcon";
 import Ratings from "./Ratings";
 import ProductTabs from "./ProductTabs";
 import { addToCart } from "../../redux/features/cart/cartSlice";
+import Navbar from "../../components/Navbar";
 
 const ProductDetails = () => {
   const { id: productId } = useParams();
@@ -82,16 +83,23 @@ const ProductDetails = () => {
         </Message>
       ) : (
         <>
+          <div className="block md:hidden w-full relative">
+  <Navbar />
+</div>
           <div className="flex flex-col items-center mt-8 px-4">
-            <div className="w-full max-w-4xl flex justify-center items-center">
-              {" "}
-              {/* Centering the image container */}
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-auto max-w-sm mb-4" // Ensures the image is centered and resizes based on screen size
-              />
-              <HeartIcon product={product} />
+            <div className="w-full max-w-4xl flex justify-center items-center relative">
+              <div className="relative w-auto max-w-sm mb-4">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-auto rounded-lg block"
+                />
+
+                {/* Clickable Favorite Icon (black, visible above image) */}
+                <div className="absolute top-3 right-3 z-20">
+                  <HeartIcon product={product} color="black" />
+                </div>
+              </div>
             </div>
 
             <div className="w-full max-w-4xl text-left">
@@ -124,6 +132,21 @@ const ProductDetails = () => {
                     <FaShoppingCart className="mr-2 text-white" /> Quantity:{" "}
                     {product.quantity}
                   </h1>
+                  {product.quantity > 0 && (
+                    <div>
+                      <select
+                        value={qty}
+                        onChange={(e) => setQty(e.target.value)}
+                        className="p-2 w-full sm:w-24 rounded-lg text-black"
+                      >
+                        {[...Array(product.quantity).keys()].map((x) => (
+                          <option key={x + 1} value={x + 1}>
+                            {x + 1}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -132,22 +155,6 @@ const ProductDetails = () => {
                   value={product.rating}
                   text={`${product.numReviews} reviews`}
                 />
-
-                {product.quantity > 0 && (
-                  <div>
-                    <select
-                      value={qty}
-                      onChange={(e) => setQty(e.target.value)}
-                      className="p-2 w-full sm:w-24 rounded-lg text-black"
-                    >
-                      {[...Array(product.quantity).keys()].map((x) => (
-                        <option key={x + 1} value={x + 1}>
-                          {x + 1}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
               </div>
 
               <button

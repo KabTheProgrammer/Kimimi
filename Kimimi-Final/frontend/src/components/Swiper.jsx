@@ -67,13 +67,13 @@ const ProductCarousel = () => {
                 key={_id}
                 className="flex items-center justify-center h-[50vh] sm:h-[60vh] md:h-[70vh]"
               >
-                <div className="relative w-full h-full flex flex-col md:flex-row items-center justify-center bg-white rounded-lg shadow-lg overflow-hidden">
+                <div className="relative w-full h-full flex flex-col md:flex-row items-center justify-center bg-white rounded-lg shadow-lg overflow-hidden pt-10 md:pt-0">
                   {/* Image */}
                   <div className="w-full md:w-1/2 h-full flex justify-center items-center">
                     <img
                       src={image}
                       alt={name}
-                      className="w-full h-full object-contain rounded-t-lg md:rounded-l-lg md:rounded-t-none"
+                      className="w-full h-full object-contain rounded-t-lg md:rounded-l-lg md:rounded-t-none "
                     />
                   </div>
 

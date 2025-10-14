@@ -15,7 +15,6 @@ import { useNavigate } from "react-router-dom";
 import "./Navigation.css";
 import { useSelector, useDispatch } from "react-redux";
 import { useLogoutMutation } from "../../redux/api/usersApiSlice";
-// import { logout } from "../../redux/features/auth/authSlice";
 import { logout } from "../../redux/features/auth/authSlice";
 import FavoritesCount from "../Products/FavoritesCount";
 
@@ -30,7 +29,7 @@ const Navigation = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  const toggleSidebar = () => {
+  const toggleSidebar = () => { 
     setShowSidebar(!showSidebar);
   };
 
@@ -49,20 +48,15 @@ const Navigation = () => {
     }
   };
 
-  const ICON_SIZE = 26;
+  const ICON_SIZE = 26; 
   return (
     <div>
-     <button
-  className="mobile-menu-icon xl:hidden lg:hidden md:hidden mt-5 text-pink-500 hover:text-pink-600 transition-colors duration-200"
-  onClick={toggleSidebar}
->
-  {showSidebar ? (
-    <AiOutlineClose size={30} />
-  ) : (
-    <AiOutlineMenu size={30} />
-  )}
-</button>
-
+      <button
+        className="mobile-menu-icon text-pink-500 hover:text-pink-600 transition-colors duration-200 xl:hidden lg:hidden md:hidden"
+        onClick={toggleSidebar}
+      >
+        {showSidebar ? <AiOutlineClose size={30} /> : <AiOutlineMenu size={30} />}
+      </button>
 
       <div
         className={`${
@@ -93,6 +87,7 @@ const Navigation = () => {
           >
             <AiOutlineShoppingCart className="mr-2 mt-[3rem]" size={26} />
             <span className="hidden nav-item-name mt-[3rem]">CART</span>{" "}
+
             <div className="absolute top-9">
               {cartItems.length > 0 && (
                 <span>
@@ -109,9 +104,7 @@ const Navigation = () => {
             className="flex items-center transition-transform transform hover:translate-x-2"
           >
             <FaHeart className="mr-2 mt-[3rem]" size={26} />
-            <span className="hidden nav-item-name mt-[3rem]">
-              FAVORITES
-            </span>{" "}
+            <span className="hidden nav-item-name mt-[3rem]">FAVORITES</span>{" "}
             <FavoritesCount />
           </Link>
 
@@ -132,11 +125,7 @@ const Navigation = () => {
           >
             {userInfo ? (
               <div className="flex items-center justify-center gap-3">
-                <b className="bg-pink-500 text-white flex items-center justify-center rounded-[50px] w-[40px] h-[40px] p-2 text-center uppercase">
-                  {userInfo.username.split(" ")[0][0]}
-                  {userInfo.username.split(" ")[1] &&
-                    userInfo.username.split(" ")[1][0]}{" "}
-                </b>
+                <b className="bg-pink-500 text-white flex items-center justify-center rounded-[50px] w-[40px] h-[40px] p-2 text-center uppercase">{userInfo.username.split(" ")[0][0]}{userInfo.username.split(" ")[1] && userInfo.username.split(" ")[1][0]} </b>
                 <span className="text-white">{userInfo.username}</span>
               </div>
             ) : (
@@ -174,7 +163,6 @@ const Navigation = () => {
                     <Link
                       to="/admin/dashboard"
                       className="block px-4 py-2 hover:bg-gray-100"
-                      onClick={() => setDropdownOpen(false)}
                     >
                       Dashboard
                     </Link>
@@ -183,7 +171,6 @@ const Navigation = () => {
                     <Link
                       to="/admin/productlist"
                       className="block px-4 py-2 hover:bg-gray-100"
-                      onClick={() => setDropdownOpen(false)}
                     >
                       Products
                     </Link>
@@ -192,7 +179,6 @@ const Navigation = () => {
                     <Link
                       to="/admin/categorylist"
                       className="block px-4 py-2 hover:bg-gray-100"
-                      onClick={() => setDropdownOpen(false)}
                     >
                       Category
                     </Link>
@@ -201,7 +187,6 @@ const Navigation = () => {
                     <Link
                       to="/admin/orderlist"
                       className="block px-4 py-2 hover:bg-gray-100"
-                      onClick={() => setDropdownOpen(false)}
                     >
                       Orders
                     </Link>
@@ -210,7 +195,6 @@ const Navigation = () => {
                     <Link
                       to="/admin/userlist"
                       className="block px-4 py-2 hover:bg-gray-100"
-                      onClick={() => setDropdownOpen(false)}
                     >
                       Users
                     </Link>
@@ -219,20 +203,13 @@ const Navigation = () => {
               )}
 
               <li>
-                <Link
-                  to="/profile"
-                  className="block px-4 py-2 hover:bg-gray-100"
-                  onClick={() => setDropdownOpen(false)}
-                >
+                <Link to="/profile" className="block px-4 py-2 hover:bg-gray-100">
                   Profile
                 </Link>
               </li>
               <li>
                 <button
-                  onClick={() => {
-                    setDropdownOpen(false);
-                    logoutHandler();
-                  }}
+                  onClick={logoutHandler}
                   className="block w-full px-4 py-2 text-left hover:bg-gray-100"
                 >
                   Logout
@@ -240,7 +217,6 @@ const Navigation = () => {
               </li>
             </ul>
           )}
-
           {!userInfo && (
             <ul>
               <li>
