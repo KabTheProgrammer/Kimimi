@@ -35,7 +35,7 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl)
       if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
+        callback(null, true); 
       } else {
         callback(new Error("CORS not allowed for this origin"));
       }
