@@ -32,7 +32,7 @@ const Register = () => {
     }
   }, [navigate, redirect, userInfo]);
 
-  const isValidUsername = (username) => /^[A-Za-z]+$/.test(username);
+  const isValidUsername = (username) => /^[A-Za-z\s.]+$/.test(username.trim());
 
   const submitHandler = async (e) => {
     e.preventDefault();
