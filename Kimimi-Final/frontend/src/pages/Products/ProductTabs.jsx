@@ -132,7 +132,9 @@ const ProductTabs = ({
                   <div className="flex justify-between">
                     <strong className="text-[#B0B0B0]">{review.name}</strong>
                     <p className="text-[#B0B0B0]">
-                      {review.createdAt.substring(0, 10)}
+                      {review.createdAt
+                        ? moment(review.createdAt).format("YYYY-MM-DD")
+                        : "N/A"}
                     </p>
                   </div>
 
