@@ -5,19 +5,22 @@ import {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useGetProductDetailsQuery,
-  useUploadProductImageMutation,
 } from "../../redux/api/productApiSlice";
 import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
 import { toast } from "react-toastify";
 
 const AdminProductUpdate = () => {
-  const { _id: productId } = useParams(); // ✅ correct param name
+  const { _id: productId } = useParams();
 
-  // ✅ fetch product details
-  const { data: productData } = useGetProductDetailsQuery(productId);
-  console.log("Product data:", productData);
+  const { data: productData, isLoading } = useGetProductDetailsQuery(productId);
+  const [updateProduct] = useUpdateProductMutation();
+  const [deleteProduct] = useDeleteProductMutation();
+  const { data: categories = [] } = useFetchCategoriesQuery();
 
-  const [image, setImage] = useState("");
+  const navigate = useNavigate();
+
+  // Product fields
+  const [images, setImages] = useState([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -25,16 +28,7 @@ const AdminProductUpdate = () => {
   const [quantity, setQuantity] = useState("");
   const [brand, setBrand] = useState("");
 
-  const navigate = useNavigate();
-
-  // ✅ fetch categories
-  const { data: categories = [] } = useFetchCategoriesQuery();
-
-  const [uploadProductImage] = useUploadProductImageMutation();
-  const [updateProduct] = useUpdateProductMutation();
-  const [deleteProduct] = useDeleteProductMutation();
-
-  // ✅ set state when data is ready
+  // Load product data into state
   useEffect(() => {
     if (productData && productData._id) {
       setName(productData.name);
@@ -43,90 +37,142 @@ const AdminProductUpdate = () => {
       setCategory(productData.category?._id || productData.category || "");
       setQuantity(productData.quantity);
       setBrand(productData.brand);
-      setImage(productData.image);
+      setImages(productData.images || (productData.image ? [productData.image] : []));
     }
   }, [productData]);
 
+  // Upload new images to Cloudinary
   const uploadFileHandler = async (e) => {
-    const formData = new FormData();
-    formData.append("image", e.target.files[0]);
-    try {
-      const res = await uploadProductImage(formData).unwrap();
-      toast.success("Image uploaded successfully");
-      setImage(res.image);
-    } catch (err) {
-      toast.error("Failed to upload image");
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    const uploaders = files.map(async (file) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "unsigned_uploads");
+
+      try {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/dcfhhdtjr/image/upload`, {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+
+        if (data.secure_url) {
+          return data.secure_url;
+        } else {
+          toast.error("Image upload failed for one file.");
+          return null;
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Image upload failed.");
+        return null;
+      }
+    });
+
+    const uploadedUrls = await Promise.all(uploaders);
+    const validUrls = uploadedUrls.filter((url) => url !== null);
+
+    if (validUrls.length > 0) {
+      setImages((prev) => [...prev, ...validUrls]);
+      toast.success(`${validUrls.length} image(s) uploaded successfully!`);
     }
   };
 
+  // Remove an image from list
+  const removeImage = (index) => {
+    const updated = [...images];
+    updated.splice(index, 1);
+    setImages(updated);
+  };
+
+  // Handle form submit (update)
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const productData = {
-        image,
         name,
         description,
         price,
         category,
         quantity,
         brand,
+        image: images[0] || "", // primary thumbnail
+        images,
       };
 
       await updateProduct({ productId, productData }).unwrap();
-
       toast.success("Product successfully updated");
       navigate("/admin/allproductslist");
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.error("Product update failed. Try again.");
     }
   };
 
+  // Delete product
   const handleDelete = async () => {
     try {
-      const confirmDelete = window.confirm(
-        "Are you sure you want to delete this product?"
-      );
+      const confirmDelete = window.confirm("Are you sure you want to delete this product?");
       if (!confirmDelete) return;
 
-      await deleteProduct(productId).unwrap(); // ✅ fixed
+      await deleteProduct(productId).unwrap();
       toast.success("Product successfully deleted");
       navigate("/admin/allproductslist");
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.error("Delete failed. Try again.");
     }
   };
+
+  if (isLoading) return <div className="text-center text-white">Loading...</div>;
 
   return (
     <div className="container xl:mx-[9rem] sm:mx-[0]">
       <div className="flex flex-col md:flex-row">
         <AdminMenu />
         <div className="md:w-3/4 p-3">
-          <div className="h-12">Update / Delete Product</div>
+          <h2 className="text-2xl font-semibold mb-6 text-white">Update / Delete Product</h2>
 
-          {image && (
-            <div className="text-center">
-              <img
-                src={image}
-                alt="product"
-                className="block mx-auto w-full h-[40%]"
-              />
+          {/* 🖼️ Image Preview Gallery */}
+          {images.length > 0 && (
+            <div className="flex flex-wrap gap-3 mb-4">
+              {images.map((img, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={img}
+                    alt={`product-${index}`}
+                    className="w-32 h-32 object-cover rounded-lg border border-gray-700"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded-full"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 
-          <div className="mb-3">
-            <label className="text-white py-2 px-4 block w-full text-center rounded-lg cursor-pointer font-bold py-11">
-              {image ? "Change image" : "Upload image"}
+          {/* 📤 Upload new images */}
+          <div className="mb-5">
+            <label className="border text-white px-4 block w-full text-center rounded-lg cursor-pointer font-bold py-11">
+              Add More Images
               <input
                 type="file"
                 accept="image/*"
+                multiple
                 onChange={uploadFileHandler}
+                className="hidden"
               />
             </label>
           </div>
 
-          <div className="p-3">
+          {/* 🧾 Product Form */}
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-wrap">
               <div className="flex-1">
                 <label htmlFor="name">Name</label> <br />
@@ -136,6 +182,7 @@ const AdminProductUpdate = () => {
                   className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  required
                 />
               </div>
               <div className="flex-1 ml-10">
@@ -146,6 +193,7 @@ const AdminProductUpdate = () => {
                   className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -159,6 +207,7 @@ const AdminProductUpdate = () => {
                   className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
+                  required
                 />
               </div>
               <div className="flex-1 ml-10">
@@ -169,15 +218,18 @@ const AdminProductUpdate = () => {
                   className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
                   value={brand}
                   onChange={(e) => setBrand(e.target.value)}
+                  required
                 />
               </div>
             </div>
 
-            <label className="my-5">Description</label>
+            <label>Description</label>
             <textarea
-              className="p-2 mb-3 bg-[#101011] border rounded-lg w-[95%] text-white"
+              className="p-3 mb-3 w-full border rounded-lg bg-[#101011] text-white"
+              rows="4"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              required
             />
 
             <div className="flex justify-between gap-10">
@@ -188,7 +240,9 @@ const AdminProductUpdate = () => {
                   className="p-4 mb-3 w-full border rounded-lg bg-[#101011] text-white"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
+                  required
                 >
+                  <option value="">Select Category</option>
                   {categories?.map((c) => (
                     <option key={c._id} value={c._id}>
                       {c.name}
@@ -198,21 +252,23 @@ const AdminProductUpdate = () => {
               </div>
             </div>
 
-            <div>
+            {/* 🧩 Buttons */}
+            <div className="flex gap-5 mt-6">
               <button
-                onClick={handleSubmit}
-                className="py-4 px-10 mt-5 rounded-lg text-lg font-bold bg-green-600 mr-6"
+                type="submit"
+                className="py-4 px-10 rounded-lg text-lg font-bold bg-green-600 hover:bg-green-700 transition"
               >
                 Update
               </button>
               <button
+                type="button"
                 onClick={handleDelete}
-                className="py-4 px-10 mt-5 rounded-lg text-lg font-bold bg-pink-600"
+                className="py-4 px-10 rounded-lg text-lg font-bold bg-pink-600 hover:bg-pink-700 transition"
               >
                 Delete
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
