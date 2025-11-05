@@ -3,15 +3,14 @@ import Product from "../models/productModel.js";
 
 const addProduct = asyncHandler(async (req, res) => {
   try {
-    const { name, description, price, category, quantity, brand, image } = req.body;
+    const { name, description, price, category, quantity, brand, images } = req.body;
 
     if (!name || !brand || !description || !price || !category || !quantity) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // ✅ Accept image URL directly from frontend
-    if (!image) {
-      return res.status(400).json({ error: "Product image is required" });
+    if (!images || images.length === 0) {
+      return res.status(400).json({ error: "At least one product image is required" });
     }
 
     const product = new Product({
@@ -21,7 +20,8 @@ const addProduct = asyncHandler(async (req, res) => {
       category,
       quantity,
       brand,
-      image, // Directly use image URL
+      image: images[0], // use first as main image
+      images,
     });
 
     await product.save();
@@ -35,28 +35,32 @@ const addProduct = asyncHandler(async (req, res) => {
 
 const updateProductDetails = asyncHandler(async (req, res) => {
   try {
-    const { name, description, price, category, quantity, brand, image } = req.body;
-
+    const { name, description, price, category, quantity, brand, images } = req.body;
     const product = await Product.findById(req.params.id);
+
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // ✅ Update fields if provided
-    product.name = name || product.name;
-    product.description = description || product.description;
-    product.price = price || product.price;
-    product.category = category || product.category;
-    product.quantity = quantity || product.quantity;
-    product.brand = brand || product.brand;
+    // ✅ Update primitive fields
+    if (name) product.name = name;
+    if (description) product.description = description;
+    if (price) product.price = price;
+    if (category) product.category = category;
+    if (quantity) product.quantity = quantity;
+    if (brand) product.brand = brand;
 
-    // ✅ Update image only if new URL provided
-    if (image) {
-      product.image = image;
+    // ✅ Handle images
+    if (Array.isArray(images)) {
+      // Replace the entire images array with the submitted one
+      product.images = images;
+
+      // Keep the main image synced to the first one
+      product.image = images.length > 0 ? images[0] : "";
     }
 
     const updatedProduct = await product.save();
-    res.json(updatedProduct);
+    res.status(200).json(updatedProduct);
   } catch (error) {
     console.error("❌ Error updating product:", error);
     res.status(500).json({ error: "Server error while updating product" });
