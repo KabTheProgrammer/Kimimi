@@ -2,12 +2,16 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useResetPasswordMutation } from "../../redux/api/usersApiSlice";
 import { toast } from "react-toastify";
+import { Eye, EyeOff } from "lucide-react"; // 👁️ icons
 
 const ResetPassword = () => {
   const { token } = useParams();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
 
   const submitHandler = async (e) => {
@@ -17,7 +21,7 @@ const ResetPassword = () => {
     try {
       await resetPassword({ token, password }).unwrap();
       toast.success("Password reset successful! Please login.");
-      navigate("/login");
+      setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
       toast.error(err?.data?.message || "Reset failed");
     }
@@ -35,23 +39,48 @@ const ResetPassword = () => {
         onSubmit={submitHandler}
         className="bg-white bg-opacity-70 shadow-lg p-10 rounded-lg w-full max-w-md"
       >
-        <h2 className="text-2xl font-semibold text-center mb-6">Reset Password</h2>
-        <input
-          type="password"
-          placeholder="Enter new password"
-          className="border p-3 w-full rounded mb-4"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Confirm password"
-          className="border p-3 w-full rounded mb-4"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          required
-        />
+        <h2 className="text-2xl font-semibold text-center text-black mb-6">
+          Reset Password
+        </h2>
+
+        {/* New Password */}
+        <div className="relative mb-4">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter new password"
+            className="border p-3 w-full rounded pr-10"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
+
+        {/* Confirm Password */}
+        <div className="relative mb-4">
+          <input
+            type={showConfirm ? "text" : "password"}
+            placeholder="Confirm password"
+            className="border p-3 w-full rounded pr-10"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600"
+            onClick={() => setShowConfirm(!showConfirm)}
+          >
+            {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
+
         <button
           type="submit"
           disabled={isLoading}
