@@ -24,7 +24,7 @@ router.post("/logout", logoutCurrentUser);
 
 // ✅ Forgot/reset password routes
 router.post("/forgot-password", forgotPassword);
-router.post("/reset-password/:token", resetPassword);
+router.put("/reset-password/:token", resetPassword);
 
 // Authenticated user routes
 router

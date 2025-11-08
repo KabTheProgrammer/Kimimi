@@ -188,7 +188,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   await user.save({ validateBeforeSave: false });
 
   // Construct the reset URL
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+ const resetUrl = `https://kimimifabricsandaccessories.com/reset-password/${resetToken}`;
 
   const message = `
     <h2>Password Reset Request</h2>
